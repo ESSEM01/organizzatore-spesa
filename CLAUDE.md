@@ -77,7 +77,7 @@ Monorepo npm workspaces (D6), Node ≥ 24.
 | Cartella | Contenuto | Test |
 |---|---|---|
 | `packages/domain` (`@spesa/domain`) | logica pura: scelta del prezzo (`risolviPrezzo`, priorità D7), totale della lista (`totaleLista`). Importi in **centesimi interi** | Vitest |
-| `apps/web` (`@spesa/web`) | PWA React 19 + Vite 8 + Tailwind 4 + vite-plugin-pwa (`registerType: 'prompt'`). Funzioni in `src/features/`: `negozi/` cerca i supermercati vicini direttamente su OSM e li mostra su una mappa Leaflet con tile OSM, non in cache (D10); `account/` gestisce accesso e token; "I miei negozi" salvati via API (D11). Client API in `src/lib/api.ts` | Vitest |
+| `apps/web` (`@spesa/web`) | PWA React 19 + Vite 8 + Tailwind 4 + vite-plugin-pwa (`registerType: 'prompt'`). Funzioni in `src/features/`: `negozi/` cerca i supermercati vicini direttamente su OSM e li mostra su una mappa Leaflet con tile OSM, non in cache (D10); `account/` gestisce accesso e token; "I miei negozi" salvati via API (D11); `spesa/` budget del periodo e liste con prezzi (D12). Schede in `#spesa` e `#negozi`. Client API in `src/lib/api.ts` | Vitest |
 | `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, auth con access token. Database: SQLite locale (`tmp/db.sqlite3`) in sviluppo e test, Turso in produzione con `DB_CONNECTION=libsql` + `LIBSQL_URL` + `LIBSQL_AUTH_TOKEN` (D8) | Japa |
 | `data/volantini/` | PDF dei volantini per prove e fixture, esclusi da git | – |
 

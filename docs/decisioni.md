@@ -282,7 +282,28 @@ organizzatore-spesa/
 
 **Verificato** nel browser: registrazione con errori per campo, ricerca, aggiunta, togli, ricaricamento, uscita, password sbagliata, nuovo accesso.
 
-**Prossimo passo.** Budget del periodo e lista della spesa, con i prezzi legati ai miei negozi (D3, D9).
+## D12 · Budget del periodo e liste della spesa (2026-11-02)
+
+**Decisione.** L'app si apre sulla scheda **Spesa**: budget del periodo in cima e liste del periodo sotto. La scheda **Negozi** contiene i miei negozi e la ricerca. La scheda aperta sta nell'indirizzo (`#spesa`, `#negozi`).
+
+**Budget.**
+- Si imposta per **questa settimana** (lunedì–domenica) o **questo mese**, calcolati da `periodoDi` nel dominio. Niente periodi sovrapposti per lo stesso utente.
+- In grande **quanto resta**; se le liste superano il budget, **"X € oltre il budget" in rosso** (regola di dominio: vince il budget e l'app lo dice). Calcolo in `riepilogoBudget` (dominio).
+- Il giorno usato è quello del **telefono** (`oggi` nelle richieste), non l'UTC del server.
+
+**Liste e prezzi.**
+- Una lista appartiene al periodo e, facoltativamente, a uno dei **miei negozi** (se l'utente ne ha uno solo si sceglie da sé).
+- Si aggiungono prodotti scrivendo il nome; lo stesso nome (senza badare a maiuscole e spazi) aumenta la quantità invece di duplicare. Il prodotto creato è dell'utente (`creato_da_user_id`).
+- **Il prezzo inserito su una voce entra nello storico** `prezzi_utente` del negozio della lista (fonte `manuale`, data di oggi): senza negozio non si salva. Così la volta dopo lo stesso prodotto ha già un prezzo.
+- Il prezzo mostrato e il totale li decide il dominio: `risolviPrezzo` (prezzo nel negozio della lista, poi di un altro negozio segnalato, poi stima) e `totaleLista`. I prodotti senza prezzo restano fuori dal totale e sono elencati.
+- Spunta delle voci (quelle spuntate vanno in fondo, barrate), rimozione, eliminazione della lista.
+
+**API** (`/api/v1`, solo con login, ogni utente vede solo i propri dati): `periodi/corrente`, `POST/PATCH periodi`, `POST/GET/PATCH/DELETE liste`, `POST liste/:id/voci`, `POST liste/:id/prezzi`, `PATCH/DELETE voci/:id`. 15 test funzionali in `tests/functional/spesa.spec.ts`.
+
+**Limiti noti.**
+- Il confronto dei nomi usa `lower()` di SQLite, che non converte le lettere accentate: "Caffè" e "CAFFÈ" restano prodotti diversi.
+- La lista non funziona ancora offline: richiede la rete (PWA - Offline e dati locali, da fare).
+- Le offerte dei volantini (D7) non entrano ancora nel calcolo.
 
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).

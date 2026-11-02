@@ -56,6 +56,72 @@ const routes = {
     tokens: [[0,"api"],[0,"v1"],[0,"miei-negozi"],[1,"id"]],
     types: placeholder as Registry['mieiNegozi.miei_negozi.destroy']['types'],
   },
+  'periodi.corrente': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/periodi/corrente',
+    tokens: [[0,"api"],[0,"v1"],[0,"periodi"],[0,"corrente"]],
+    types: placeholder as Registry['periodi.corrente']['types'],
+  },
+  'periodi.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/periodi',
+    tokens: [[0,"api"],[0,"v1"],[0,"periodi"]],
+    types: placeholder as Registry['periodi.store']['types'],
+  },
+  'periodi.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/periodi/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"periodi"],[1,"id"]],
+    types: placeholder as Registry['periodi.update']['types'],
+  },
+  'liste.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/liste',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"]],
+    types: placeholder as Registry['liste.store']['types'],
+  },
+  'liste.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/liste/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[1,"id"]],
+    types: placeholder as Registry['liste.show']['types'],
+  },
+  'liste.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/liste/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[1,"id"]],
+    types: placeholder as Registry['liste.update']['types'],
+  },
+  'liste.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/liste/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[1,"id"]],
+    types: placeholder as Registry['liste.destroy']['types'],
+  },
+  'liste.aggiungi_voce': {
+    methods: ["POST"],
+    pattern: '/api/v1/liste/:id/voci',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[1,"id"],[0,"voci"]],
+    types: placeholder as Registry['liste.aggiungi_voce']['types'],
+  },
+  'liste.aggiungi_prezzo': {
+    methods: ["POST"],
+    pattern: '/api/v1/liste/:id/prezzi',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[1,"id"],[0,"prezzi"]],
+    types: placeholder as Registry['liste.aggiungi_prezzo']['types'],
+  },
+  'voci.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/voci/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"voci"],[1,"id"]],
+    types: placeholder as Registry['voci.update']['types'],
+  },
+  'voci.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/voci/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"voci"],[1,"id"]],
+    types: placeholder as Registry['voci.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

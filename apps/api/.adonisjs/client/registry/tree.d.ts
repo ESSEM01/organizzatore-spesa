@@ -26,4 +26,21 @@ export interface ApiDefinition {
       destroy: typeof routes['mieiNegozi.miei_negozi.destroy']
     }
   }
+  periodi: {
+    corrente: typeof routes['periodi.corrente']
+    store: typeof routes['periodi.store']
+    update: typeof routes['periodi.update']
+  }
+  liste: {
+    store: typeof routes['liste.store']
+    show: typeof routes['liste.show']
+    update: typeof routes['liste.update']
+    destroy: typeof routes['liste.destroy']
+    aggiungiVoce: typeof routes['liste.aggiungi_voce']
+    aggiungiPrezzo: typeof routes['liste.aggiungi_prezzo']
+  }
+  voci: {
+    update: typeof routes['voci.update']
+    destroy: typeof routes['voci.destroy']
+  }
 }

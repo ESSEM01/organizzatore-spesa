@@ -13,3 +13,21 @@ export function formatDistanza(metri: number): string {
 export function formatEuro(centesimi: number): string {
   return euro.format(centesimi / 100)
 }
+
+/**
+ * Importo scritto dall'utente ("1,29", "1.234,50 €", "3.49") in centesimi interi.
+ * `null` se non è un importo valido: niente arrotondamenti silenziosi oltre i centesimi.
+ */
+export function leggiEuro(testo: string): number | null {
+  let t = testo.replace(/[\s€]/g, '')
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.')
+  const m = /^(\d+)(?:\.(\d{1,2}))?$/.exec(t)
+  if (!m) return null
+  return Number(m[1]) * 100 + Number((m[2] ?? '').padEnd(2, '0'))
+}
+
+/** Data di oggi sul telefono, `AAAA-MM-GG`: il server lavora in UTC, l'utente in Italia. */
+export function oggiLocale(adesso: Date = new Date()): string {
+  const due = (n: number) => String(n).padStart(2, '0')
+  return `${adesso.getFullYear()}-${due(adesso.getMonth() + 1)}-${due(adesso.getDate())}`
+}

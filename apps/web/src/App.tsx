@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { NegozioVicino } from '@spesa/domain'
+import { Accesso } from './features/account/Accesso'
 import { ProviderAccount } from './features/account/contestoAccount'
 import { useAccount } from './features/account/usaAccount'
 import { MieiNegozi } from './features/negozi/MieiNegozi'
@@ -11,7 +12,19 @@ import {
   rimuoviMioNegozio,
   type NegozioSalvato,
 } from './features/negozi/salvataggio'
+import { Spesa } from './features/spesa/Spesa'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
+
+type Scheda = 'spesa' | 'negozi'
+
+// La scheda aperta sta nell'indirizzo (#spesa, #negozi): sopravvive al ricaricamento e al tasto indietro.
+function schedaDaIndirizzo(): Scheda {
+  return location.hash === '#negozi' ? 'negozi' : 'spesa'
+}
+function iscrivitiIndirizzo(avvisa: () => void) {
+  addEventListener('hashchange', avvisa)
+  return () => removeEventListener('hashchange', avvisa)
+}
 
 export default function App() {
   return (
@@ -23,6 +36,7 @@ export default function App() {
 
 function Schermata() {
   const { api, stato, esci } = useAccount()
+  const scheda = useSyncExternalStore(iscrivitiIndirizzo, schedaDaIndirizzo)
   const [miei, setMiei] = useState<NegozioSalvato[] | null>(null)
   const [errore, setErrore] = useState<string | null>(null)
   const connesso = stato.tipo === 'utente'
@@ -75,10 +89,46 @@ function Schermata() {
         )}
       </header>
 
-      <main className="flex flex-1 flex-col gap-8 pb-24">
-        <MieiNegozi negozi={mostrati} errore={errore} onRimuovi={rimuovi} />
-        <NegoziVicini mieiOsmIds={mieiOsmIds} onAggiungi={connesso ? aggiungi : null} />
+      <main className="flex flex-1 flex-col gap-8 pb-28">
+        {scheda === 'spesa' &&
+          (connesso ? (
+            <Spesa api={api} mieiNegozi={mostrati ?? []} />
+          ) : (
+            <section className="flex flex-col gap-3">
+              <h2 className="text-xl font-semibold">La tua spesa</h2>
+              <p className="text-sm text-testo-tenue text-pretty">
+                Accedi per impostare il budget e preparare le liste della spesa.
+              </p>
+              {stato.tipo === 'ospite' ? <Accesso /> : <p className="text-sm text-testo-tenue">Controllo l’accesso…</p>}
+            </section>
+          ))}
+        {scheda === 'negozi' && (
+          <>
+            <MieiNegozi negozi={mostrati} errore={errore} onRimuovi={rimuovi} />
+            <NegoziVicini mieiOsmIds={mieiOsmIds} onAggiungi={connesso ? aggiungi : null} />
+          </>
+        )}
       </main>
+
+      <nav aria-label="Sezioni" className="fixed inset-x-0 bottom-0 z-[1100] border-t border-bordo bg-fondo/95 backdrop-blur">
+        <div className="mx-auto grid max-w-md grid-cols-2 px-4 pb-[env(safe-area-inset-bottom)]">
+          {(
+            [
+              ['spesa', 'Spesa'],
+              ['negozi', 'Negozi'],
+            ] as const
+          ).map(([s, etichetta]) => (
+            <a
+              key={s}
+              href={`#${s}`}
+              aria-current={scheda === s ? 'page' : undefined}
+              className="flex min-h-14 items-center justify-center text-sm font-medium text-testo-tenue aria-[current=page]:text-testo aria-[current=page]:underline aria-[current=page]:underline-offset-8"
+            >
+              {etichetta}
+            </a>
+          ))}
+        </div>
+      </nav>
 
       <UpdatePrompt />
     </div>

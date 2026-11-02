@@ -13,7 +13,7 @@ export function UpdatePrompt() {
   return (
     <div
       role="status"
-      className="fixed inset-x-4 bottom-4 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-bordo bg-superficie p-3 shadow-sm"
+      className="fixed inset-x-4 bottom-20 z-[1200] mx-auto flex max-w-md items-center gap-3 rounded-lg border border-bordo bg-superficie p-3 shadow-sm"
     >
       <p className="flex-1 text-sm">{needRefresh ? 'È disponibile una nuova versione.' : 'Pronta anche senza rete.'}</p>
       {needRefresh && (

@@ -112,6 +112,149 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['destroy']>>>
     }
   }
+  'periodi.corrente': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/periodi/corrente'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['corrente']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['corrente']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['corrente']>>>
+    }
+  }
+  'periodi.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/periodi'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').creaPeriodoValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').creaPeriodoValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'periodi.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/periodi/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').modificaPeriodoValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').modificaPeriodoValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'liste.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/liste'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').creaListaValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').creaListaValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'liste.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/liste/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['show']>>>
+    }
+  }
+  'liste.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/liste/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').modificaListaValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').modificaListaValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'liste.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/liste/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['destroy']>>>
+    }
+  }
+  'liste.aggiungi_voce': {
+    methods: ["POST"]
+    pattern: '/api/v1/liste/:id/voci'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').aggiungiVoceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').aggiungiVoceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiVoce']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiVoce']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiVoce']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'liste.aggiungi_prezzo': {
+    methods: ["POST"]
+    pattern: '/api/v1/liste/:id/prezzi'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').prezzoValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').prezzoValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiPrezzo']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiPrezzo']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/liste_controller').default['aggiungiPrezzo']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'voci.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/voci/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/spesa').modificaVoceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/spesa').modificaVoceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'voci.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/voci/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/voci_controller').default['destroy']>>>
+    }
+  }
 }
 
 export namespace Route {
