@@ -17,8 +17,9 @@ async function scenario() {
     password: 'password-di-prova',
   })
   const altro = await User.create({ email: 'altro@example.invalid', password: 'password-di-prova' })
-  const conad = await Catena.create({ codice: 'conad', nome: 'Conad', modalitaOfferte: 'pdf' })
-  const todis = await Catena.create({ codice: 'todis', nome: 'Todis', modalitaOfferte: 'pdf' })
+  // Catene precaricate dalla migrazione di seed (D7).
+  const conad = await Catena.findByOrFail('codice', 'conad')
+  const todis = await Catena.findByOrFail('codice', 'todis')
   const base = {
     comune: 'Roma',
     provincia: 'RM',

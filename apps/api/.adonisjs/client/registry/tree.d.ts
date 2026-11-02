@@ -19,4 +19,11 @@ export interface ApiDefinition {
       destroy: typeof routes['profile.access_tokens.destroy']
     }
   }
+  mieiNegozi: {
+    mieiNegozi: {
+      index: typeof routes['mieiNegozi.miei_negozi.index']
+      store: typeof routes['mieiNegozi.miei_negozi.store']
+      destroy: typeof routes['mieiNegozi.miei_negozi.destroy']
+    }
+  }
 }

@@ -73,6 +73,45 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
     }
   }
+  'mieiNegozi.miei_negozi.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/miei-negozi'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['index']>>>
+    }
+  }
+  'mieiNegozi.miei_negozi.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/miei-negozi'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/negozio').aggiungiNegozioValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/negozio').aggiungiNegozioValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'mieiNegozi.miei_negozi.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/miei-negozi/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/miei_negozi_controller').default['destroy']>>>
+    }
+  }
 }
 
 export namespace Route {

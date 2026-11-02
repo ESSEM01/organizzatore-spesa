@@ -35,5 +35,17 @@ router
       .prefix('account')
       .as('profile')
       .use(middleware.auth())
+
+    router
+      .group(() => {
+        router.get('/', [controllers.MieiNegozi, 'index'])
+        router.post('/', [controllers.MieiNegozi, 'store'])
+        router
+          .delete('/:id', [controllers.MieiNegozi, 'destroy'])
+          .where('id', router.matchers.number())
+      })
+      .prefix('miei-negozi')
+      .as('mieiNegozi')
+      .use(middleware.auth())
   })
   .prefix('/api/v1')

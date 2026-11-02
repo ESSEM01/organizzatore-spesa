@@ -263,7 +263,26 @@ organizzatore-spesa/
 - Trascinando la mappa oltre un quarto del raggio compare **"Cerca in quest'area"**, che cerca attorno al nuovo centro. Mappa e lista restano visibili durante la ricerca.
 - Logica testata in `apps/web/src/features/negozi/vistaMappa.ts`; il componente è `Mappa.tsx`.
 
-**Prossimo passo.** Scegliere i "miei negozi" e salvarli nel database (`negozi`, `negozi_utente`), con login nella PWA.
+## D11 · Account e "I miei negozi" (2026-11-02)
+
+**Decisione.** L'utente sceglie tra i supermercati trovati quelli dove fa la spesa; restano salvati nel suo account. Serve l'accesso nella PWA (registrazione con email e password, già previste dallo starter kit API).
+
+**API** (`/api/v1/miei-negozi`, solo con login):
+- `GET` elenco dei miei negozi, `POST` aggiunge un negozio trovato su OSM, `DELETE /:id` lo toglie dai miei.
+- Il negozio è un dato comune (`negozi`, unico per `osm_id`, aggiornato a ogni aggiunta); il collegamento è personale (`negozi_utente`). Aggiungere due volte non crea duplicati; ogni utente vede e toglie solo i propri.
+- La catena si collega dal codice di `catenaDaOsm`; un codice sconosciuto salva il negozio senza catena.
+- Le 23 catene riconosciute sono precaricate con una migrazione di dati (`1793600000011_seed_catene_table.ts`), con la modalità delle offerte di D7. Applicata in locale e su Turso.
+- Messaggi di validazione in italiano per tutta l'API (`start/validator.ts`), mostrati così come sono dalla PWA.
+
+**PWA.**
+- Sezione "I miei negozi" in cima: da ospite mostra il modulo di accesso; da connessi l'elenco con "Togli". Nei risultati della ricerca ogni negozio ha "Aggiungi" o "Tra i miei".
+- Al server arrivano solo dati pubblici del negozio (nome, indirizzo, posizione del negozio, catena) e la provincia della zona, mai la distanza o la posizione dell'utente (D5).
+- Il token di accesso sta in `localStorage`. È semplice e va bene per l'uso personale, ma uno script iniettato nella pagina (XSS) potrebbe leggerlo. **Se l'app diventa pubblica**: passare a un cookie `httpOnly` con la guardia di sessione, già presente nello starter kit.
+- Con un 401 il token si dimentica e si torna ospiti; all'avvio un token salvato si verifica con `/account/profile`.
+
+**Verificato** nel browser: registrazione con errori per campo, ricerca, aggiunta, togli, ricaricamento, uscita, password sbagliata, nuovo accesso.
+
+**Prossimo passo.** Budget del periodo e lista della spesa, con i prezzi legati ai miei negozi (D3, D9).
 
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).

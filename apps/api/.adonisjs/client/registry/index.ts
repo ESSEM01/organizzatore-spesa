@@ -38,6 +38,24 @@ const routes = {
     tokens: [[0,"api"],[0,"v1"],[0,"account"],[0,"logout"]],
     types: placeholder as Registry['profile.access_tokens.destroy']['types'],
   },
+  'mieiNegozi.miei_negozi.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/miei-negozi',
+    tokens: [[0,"api"],[0,"v1"],[0,"miei-negozi"]],
+    types: placeholder as Registry['mieiNegozi.miei_negozi.index']['types'],
+  },
+  'mieiNegozi.miei_negozi.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/miei-negozi',
+    tokens: [[0,"api"],[0,"v1"],[0,"miei-negozi"]],
+    types: placeholder as Registry['mieiNegozi.miei_negozi.store']['types'],
+  },
+  'mieiNegozi.miei_negozi.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/miei-negozi/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"miei-negozi"],[1,"id"]],
+    types: placeholder as Registry['mieiNegozi.miei_negozi.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

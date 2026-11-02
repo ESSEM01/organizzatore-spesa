@@ -25,7 +25,14 @@ interface UltimaRicerca {
   origine: OrigineRicerca
 }
 
-export function NegoziVicini() {
+interface PropsNegoziVicini {
+  /** Negozi già tra i miei, per segnarli come aggiunti. */
+  mieiOsmIds: ReadonlySet<string>
+  /** `null` se l'utente non ha fatto l'accesso: il bottone Aggiungi non compare. */
+  onAggiungi: ((negozio: NegozioVicino, localita: Localita | null) => Promise<void>) | null
+}
+
+export function NegoziVicini({ mieiOsmIds, onAggiungi }: PropsNegoziVicini) {
   const [raggio, setRaggio] = useState<number>(2000)
   const [testo, setTesto] = useState('')
   const [stato, setStato] = useState<Stato>({ tipo: 'iniziale' })
@@ -177,7 +184,14 @@ export function NegoziVicini() {
                 </button>
               )}
             </div>
-            <Risultati {...ultimi} raggio={raggio} selezionato={selezionato} onSeleziona={setSelezionato} />
+            <Risultati
+              {...ultimi}
+              raggio={raggio}
+              selezionato={selezionato}
+              onSeleziona={setSelezionato}
+              mieiOsmIds={mieiOsmIds}
+              onAggiungi={onAggiungi}
+            />
           </>
         )}
       </div>
@@ -192,6 +206,8 @@ function Risultati({
   raggio,
   selezionato,
   onSeleziona,
+  mieiOsmIds,
+  onAggiungi,
 }: {
   negozi: NegozioVicino[]
   fonte: 'overpass' | 'nominatim'
@@ -199,7 +215,23 @@ function Risultati({
   raggio: number
   selezionato: string | null
   onSeleziona: (osmId: string) => void
-}) {
+} & PropsNegoziVicini) {
+  const [inCorso, setInCorso] = useState<string | null>(null)
+  const [errore, setErrore] = useState<string | null>(null)
+
+  async function aggiungi(n: NegozioVicino) {
+    if (!onAggiungi) return
+    setInCorso(n.osmId)
+    setErrore(null)
+    try {
+      await onAggiungi(n, localita)
+    } catch (e) {
+      setErrore(e instanceof Error ? e.message : 'Non sono riuscito ad aggiungere il negozio.')
+    } finally {
+      setInCorso(null)
+    }
+  }
+
   const dove = localita?.comune ? ` · ${localita.comune}${localita.provincia ? ` (${localita.provincia})` : ''}` : ''
 
   if (negozi.length === 0) {
@@ -221,14 +253,19 @@ function Risultati({
           alcuni negozi.
         </p>
       )}
+      {errore && (
+        <p role="alert" className="text-sm text-sforamento">
+          {errore}
+        </p>
+      )}
       <ul className="divide-y divide-bordo border-y border-bordo">
         {negozi.map((n) => (
-          <li key={n.osmId}>
+          <li key={n.osmId} className="flex items-center gap-1">
             <button
               type="button"
               aria-pressed={n.osmId === selezionato}
               onClick={() => onSeleziona(n.osmId)}
-              className="flex min-h-11 w-full items-baseline justify-between gap-3 px-2 py-3 text-left aria-pressed:bg-marca/10"
+              className="flex min-h-11 min-w-0 flex-1 items-baseline justify-between gap-3 px-2 py-3 text-left aria-pressed:bg-marca/10"
             >
             <div className="min-w-0">
               <p className="truncate font-medium">{n.nome}</p>
@@ -238,6 +275,22 @@ function Risultati({
             </div>
             <span className="shrink-0 text-right text-sm tabular-nums">{formatDistanza(n.distanzaMetri)}</span>
             </button>
+            {onAggiungi &&
+              (mieiOsmIds.has(n.osmId) ? (
+                <span className="flex min-h-11 w-24 shrink-0 items-center justify-center text-sm text-risparmio">
+                  Tra i miei
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => aggiungi(n)}
+                  disabled={inCorso !== null}
+                  aria-label={`Aggiungi ${n.nome}${n.indirizzo ? `, ${n.indirizzo}` : ''} ai miei negozi`}
+                  className="min-h-11 w-24 shrink-0 rounded-lg border border-bordo bg-superficie text-sm font-medium disabled:opacity-60"
+                >
+                  {inCorso === n.osmId ? '…' : 'Aggiungi'}
+                </button>
+              ))}
           </li>
         ))}
       </ul>
