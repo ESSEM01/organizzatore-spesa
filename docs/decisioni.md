@@ -136,7 +136,7 @@ Registro delle decisioni di progetto. Ogni voce ha data, scelta, motivo e conseg
 
 ## D6 · Database, repository e hosting (2026-11-02)
 
-**Database: SQLite** con Lucid.
+**Database: SQLite** con Lucid. *Aggiornato da D8*: in produzione il file SQLite è sostituito da Turso.
 - Motivo: un solo file, nessun container in più, RAM minima sul server, backup = copia del file. Basta per un uso personale.
 - I progetti AdonisJS esistenti usano MySQL: scartato qui per il costo operativo (un container in più), non per limiti tecnici.
 - Regola: niente funzioni specifiche di SQLite nelle query, così il passaggio a PostgreSQL o MySQL resta un cambio di driver e configurazione se l'app avrà più utenti.
@@ -194,6 +194,33 @@ organizzatore-spesa/
 **Prima dell'implementazione.**
 - Rileggere nel testo originale i termini d'uso di conad.it e cedigros.com (finora verificati solo footer e robots.txt).
 - Se l'app diventa pubblica, il recupero automatico per più utenti va rivalutato con le catene (o con ShopFully): è un'estrazione sistematica.
+
+## D8 · Database in cloud: Turso (2026-11-02)
+
+**Decisione.** In produzione il database è **Turso** (libSQL, compatibile con SQLite), piano gratuito. In sviluppo e nei test resta il file SQLite locale (`apps/api/tmp/db.sqlite3`).
+
+**Motivo.**
+- Resta SQLite (D6): stesse migrazioni e stesse query, cambia solo dove sta il database.
+- Piano gratuito senza carta di credito (listino del 2026-11-02): 100 database, 5 GB, 500 milioni di righe lette e 10 milioni scritte al mese, ripristino a 1 giorno. Nessuna pausa per inattività indicata.
+- Confronto: Neon (PostgreSQL) sospende il calcolo dopo 5 minuti e limita a 1 GB per progetto; Supabase mette in pausa i progetti dopo 1 settimana di inattività, scomodo per un'app usata a intermittenza.
+- Il ripristino a un giorno sostituisce il backup giornaliero del file previsto in D6.
+
+**Come funziona in AdonisJS.**
+- Lucid supporta `client: 'libsql'` con il driver `@libsql/sqlite3` (installato). Il driver vuole URL e token in un unico `filename`: `libsql://<db>.turso.io?authToken=<token>`. Il commento nella configurazione generata dallo starter kit (`@libsql/client`, `url`, `authToken`) non corrisponde al driver usato da Lucid 22.4.
+- Variabili: `DB_CONNECTION=libsql`, `LIBSQL_URL`, `LIBSQL_AUTH_TOKEN` (solo in `.env` o nei segreti del server, mai nel codice). Senza `DB_CONNECTION` si usa SQLite locale.
+- `app/services/libsql.ts` costruisce il `filename` (test in `tests/unit/libsql.spec.ts`); l'URL viene letto solo quando la connessione libsql è attiva.
+
+**Verificato il 2026-11-02** su un database Turso reale: migrazioni eseguite, e registrazione, login, profilo e logout funzionanti tramite l'API.
+
+**Problema trovato e corretto.** `@libsql/sqlite3` restituisce righe con colonne in sola lettura; `@adonisjs/auth` modifica la riga del token (`last_used_at`) e andava in `TypeError` (errore 500 su ogni richiesta autenticata). `rendiRigheModificabili` in `app/services/libsql.ts` avvolge `Statement.get/all/each` del driver per restituire copie normali; si applica in `config/database.ts` solo con `DB_CONNECTION=libsql`. Test in `tests/unit/libsql.spec.ts`.
+
+**Rischi.**
+- `@libsql/sqlite3` è fermo alla 0.3.1 (giugno 2023), ma è il driver previsto da Lucid, e la correzione sopra dipende dalla sua struttura interna. Se dà altri problemi, alternativa: dialect knex basato su `@libsql/client`. Da segnalare a Lucid.
+- Ogni query passa dalla rete: più lenta del file locale. Da misurare quando ci sono dati veri.
+- La regione va scelta in UE (Frankfurt se disponibile, codice `fra`), da confermare alla creazione del database.
+- Limiti e condizioni del piano gratuito possono cambiare: ricontrollare il listino prima della pubblicazione.
+
+**Fatto.** Database creato dall'utente, URL e token in `apps/api/.env`, migrazioni eseguite su Turso.
 
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).

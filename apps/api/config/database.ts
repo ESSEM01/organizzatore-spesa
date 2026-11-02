@@ -1,11 +1,20 @@
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
+import { createRequire } from 'node:module'
+import env from '#start/env'
+import { libsqlFilename, rendiRigheModificabili } from '#services/libsql'
+
+if (env.get('DB_CONNECTION') === 'libsql') {
+  // Stesso modulo che carica il client libsql di Lucid: vedi rendiRigheModificabili.
+  rendiRigheModificabili(createRequire(import.meta.url)('@libsql/sqlite3').Statement)
+}
 
 const dbConfig = defineConfig({
   /**
    * Default connection used for all queries.
+   * Sviluppo e test: file SQLite locale. Produzione: Turso (DB_CONNECTION=libsql), vedi D8.
    */
-  connection: 'sqlite',
+  connection: env.get('DB_CONNECTION', 'sqlite'),
 
   connections: {
     /**
@@ -121,26 +130,27 @@ const dbConfig = defineConfig({
     // },
 
     /**
-     * libSQL (Turso) connection.
-     * Install package to switch: npm install @libsql/client
+     * libSQL (Turso). Lucid usa il driver `@libsql/sqlite3`, che vuole URL e token
+     * in un unico `filename`. L'URL si costruisce solo quando questa connessione è attiva,
+     * così in sviluppo non servono le variabili di Turso.
      */
-    // libsql: {
-    //   client: 'libsql',
-    //   connection: {
-    //     url: env.get('LIBSQL_URL'),
-    //     authToken: env.get('LIBSQL_AUTH_TOKEN'),
-    //   },
-    //   useNullAsDefault: true,
-    //   migrations: {
-    //     naturalSort: true,
-    //     paths: ['database/migrations'],
-    //   },
-    //   schemaGeneration: {
-    //     enabled: true,
-    //     rulesPaths: ['./database/schema_rules.js'],
-    //   },
-    //   debug: app.inDev,
-    // },
+    libsql: {
+      client: 'libsql',
+      connection: {
+        get filename() {
+          return libsqlFilename(env.get('LIBSQL_URL'), env.get('LIBSQL_AUTH_TOKEN')?.release())
+        },
+      },
+      useNullAsDefault: true,
+      migrations: {
+        naturalSort: true,
+        paths: ['database/migrations'],
+      },
+      schemaGeneration: {
+        enabled: true,
+        rulesPaths: ['./database/schema_rules.js'],
+      },
+    },
   },
 })
 

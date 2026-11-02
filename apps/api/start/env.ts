@@ -24,4 +24,9 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+
+  // Database (D8): SQLite locale in sviluppo e test, Turso in produzione
+  DB_CONNECTION: Env.schema.enum.optional(['sqlite', 'libsql'] as const),
+  LIBSQL_URL: Env.schema.string.optional(),
+  LIBSQL_AUTH_TOKEN: Env.schema.secret.optional(),
 })

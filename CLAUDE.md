@@ -78,7 +78,7 @@ Monorepo npm workspaces (D6), Node ≥ 24.
 |---|---|---|
 | `packages/domain` (`@spesa/domain`) | logica pura: scelta del prezzo (`risolviPrezzo`, priorità D7), totale della lista (`totaleLista`). Importi in **centesimi interi** | Vitest |
 | `apps/web` (`@spesa/web`) | PWA React 19 + Vite 8 + Tailwind 4 + vite-plugin-pwa (`registerType: 'prompt'`) | Vitest |
-| `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, SQLite (`tmp/db.sqlite3`), auth con access token | Japa |
+| `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, auth con access token. Database: SQLite locale (`tmp/db.sqlite3`) in sviluppo e test, Turso in produzione con `DB_CONNECTION=libsql` + `LIBSQL_URL` + `LIBSQL_AUTH_TOKEN` (D8) | Japa |
 | `data/volantini/` | PDF dei volantini per prove e fixture, esclusi da git | – |
 
 Comandi dalla radice:
