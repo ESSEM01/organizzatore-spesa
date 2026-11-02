@@ -29,4 +29,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_CONNECTION: Env.schema.enum.optional(['sqlite', 'libsql'] as const),
   LIBSQL_URL: Env.schema.string.optional(),
   LIBSQL_AUTH_TOKEN: Env.schema.secret.optional(),
+
+  // Claude (D4): lettura dei volantini, poi ricette e scontrini
+  ANTHROPIC_API_KEY: Env.schema.secret.optional(),
 })

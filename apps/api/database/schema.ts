@@ -137,6 +137,51 @@ export class NegoziUtenteSchema extends BaseModel {
   declare userId: number
 }
 
+export class OfferteSchema extends BaseModel {
+  static $columns = ['categoria', 'catenaId', 'centesimi', 'condizione', 'createdAt', 'formato', 'id', 'marca', 'negozioId', 'nome', 'pagina', 'prezzoPienoCentesimi', 'prodottoId', 'quantita', 'stato', 'unita', 'updatedAt', 'validoAl', 'validoDal', 'volantinoId'] as const
+  $columns = OfferteSchema.$columns
+  @column()
+  declare categoria: string
+  @column()
+  declare catenaId: number
+  @column()
+  declare centesimi: number
+  @column()
+  declare condizione: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare formato: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare marca: string | null
+  @column()
+  declare negozioId: number | null
+  @column()
+  declare nome: string
+  @column()
+  declare pagina: number | null
+  @column()
+  declare prezzoPienoCentesimi: number | null
+  @column()
+  declare prodottoId: number | null
+  @column()
+  declare quantita: number | null
+  @column()
+  declare stato: string
+  @column()
+  declare unita: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column.date()
+  declare validoAl: DateTime
+  @column.date()
+  declare validoDal: DateTime
+  @column()
+  declare volantinoId: number | null
+}
+
 export class PeriodiBudgetSchema extends BaseModel {
   static $columns = ['al', 'budgetCentesimi', 'createdAt', 'dal', 'id', 'updatedAt', 'userId'] as const
   $columns = PeriodiBudgetSchema.$columns
@@ -219,6 +264,33 @@ export class ProdottiSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class RichiesteLlmSchema extends BaseModel {
+  static $columns = ['createdAt', 'esito', 'id', 'modello', 'scopo', 'stopReason', 'tokenCacheLettura', 'tokenInput', 'tokenOutput', 'updatedAt', 'userId'] as const
+  $columns = RichiesteLlmSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare esito: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare modello: string
+  @column()
+  declare scopo: string
+  @column()
+  declare stopReason: string | null
+  @column()
+  declare tokenCacheLettura: number
+  @column()
+  declare tokenInput: number
+  @column()
+  declare tokenOutput: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
@@ -255,4 +327,43 @@ export class VociListaSchema extends BaseModel {
   declare spuntata: boolean
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class VolantiniSchema extends BaseModel {
+  static $columns = ['ambito', 'catenaId', 'createdAt', 'errore', 'file', 'hashContenuto', 'id', 'lettoIl', 'negozioId', 'regione', 'richiestaLlmId', 'stato', 'titolo', 'updatedAt', 'urlFonte', 'validoAl', 'validoDal'] as const
+  $columns = VolantiniSchema.$columns
+  @column()
+  declare ambito: string
+  @column()
+  declare catenaId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare errore: string | null
+  @column()
+  declare file: string | null
+  @column()
+  declare hashContenuto: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare lettoIl: DateTime | null
+  @column()
+  declare negozioId: number | null
+  @column()
+  declare regione: string | null
+  @column()
+  declare richiestaLlmId: number | null
+  @column()
+  declare stato: string
+  @column()
+  declare titolo: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare urlFonte: string | null
+  @column.date()
+  declare validoAl: DateTime | null
+  @column.date()
+  declare validoDal: DateTime | null
 }

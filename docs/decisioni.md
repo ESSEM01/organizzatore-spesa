@@ -305,6 +305,31 @@ organizzatore-spesa/
 - La lista non funziona ancora offline: richiede la rete (PWA - Offline e dati locali, da fare).
 - Le offerte dei volantini (D7) non entrano ancora nel calcolo.
 
+## D13 · Lista generata dall'IA e scelta di un solo supermercato (2026-11-02)
+
+**Decisione dell'utente.** La lista della spesa la propone un modello di IA in base al budget e ai prezzi dei supermercati vicini. Si fa la spesa in **un solo supermercato**, scelto con queste priorità: **budget** (massima) → **distanza** (intermedia) → **prezzi** (ultima).
+
+**Regola di scelta del negozio: distanza pesata** (scelta dell'utente).
+1. Per ogni negozio candidato si calcola il totale della lista con i prezzi di **quel** negozio (offerte valide, prezzi dell'utente); i prodotti senza prezzo in quel negozio si stimano (altro negozio, Osservaprezzi) e la copertura si mostra ("12 prezzi su 15 sono di questo negozio").
+2. **Budget, vincolo rigido**: si scartano i negozi dove la lista supera il budget residuo del periodo. Se lo superano tutti vince quello che lo sfora di meno, e l'app lo dice.
+3. Tra i negozi nel budget vince il **costo effettivo più basso** = totale + distanza in km × **costo per km** (predefinito 1,50 €/km, regolabile dall'utente). A parità vince il più vicino.
+4. Funzione pura nel dominio (`scegliNegozio`), sviluppata in TDD.
+
+**Privacy (D5).** La distanza si calcola **sul telefono**: il server restituisce i totali per negozio, la PWA (che conosce la posizione arrotondata e la posizione pubblica dei negozi) applica la regola. Il server non riceve né la posizione né le distanze, che permetterebbero di ricostruirla.
+
+**Ruolo dell'IA (D4).** Claude Opus 5.5 decide **cosa** comprare e in che quantità (dieta il più equilibrata possibile dentro il budget), scegliendo dal **catalogo con prezzi** che gli passa il backend. **Non calcola** prezzi né totali: li ricalcola il dominio; se la lista supera il budget, il backend chiede al modello di ridurla o la taglia con una regola deterministica. Output con structured outputs e validazione VineJS.
+
+**Ordine di lavoro (scelta dell'utente: prima le offerte).**
+1. **Offerte dai volantini** (D7): recupero dei PDF ufficiali di Conad, GROS, Todis, Elite, NaturaSì e lettura con Claude Opus 5.5 → tabelle `volantini` e `offerte` (fase 2 del database, D9). Serve `ANTHROPIC_API_KEY` in `apps/api/.env`.
+2. **Stime Osservaprezzi** per i freschi (D1): import mensile per provincia → `stime_osservaprezzi`.
+3. **Lista con l'IA e scelta del negozio**: catalogo con prezzi per catena, generazione, ricalcolo, classifica dei negozi sul telefono.
+
+**Stato del passo 1 (2026-11-03).** Comando `node ace volantini:leggi <pdf…>`: 13 volantini su 14 letti, 3.292 offerte salvate come `proposta`. Costo registrato in `richieste_llm` circa $9,90 (le risposte pesano più dei PDF). Le letture riuscite restano in cache su disco (`data/volantini/letture`, esclusa da git) per non ripagarle se il salvataggio su Turso fallisce; la lettura usa lo streaming perché le richieste lunghe senza stream cadevano in timeout. Da fare: lettura a blocchi di pagine per i volantini troppo grandi (GROS Pewex, risposta troncata) e rilettura di GROS MA (solo 27 offerte, probabilmente incompleto).
+
+**Da chiarire prima della fase 3.** Per quante persone e per quanti giorni è la spesa; preferenze alimentari (dati sulla salute, D5).
+
+Piano dettagliato: `.omc/plans/lista-ia.md`.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.
