@@ -3,10 +3,36 @@ import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { type AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import { hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
+import CondizioneUtente from '#models/condizione_utente'
+import Lista from '#models/lista'
+import NegozioUtente from '#models/negozio_utente'
+import PeriodoBudget from '#models/periodo_budget'
+import PreferenzeUtente from '#models/preferenze_utente'
+import PrezzoUtente from '#models/prezzo_utente'
 
 export default class User extends compose(UserSchema, withAuthFinder(hash)) {
   static accessTokens = DbAccessTokensProvider.forModel(User)
   declare currentAccessToken?: AccessToken
+
+  @hasOne(() => PreferenzeUtente)
+  declare preferenze: HasOne<typeof PreferenzeUtente>
+
+  @hasMany(() => NegozioUtente)
+  declare negozi: HasMany<typeof NegozioUtente>
+
+  @hasMany(() => CondizioneUtente)
+  declare condizioni: HasMany<typeof CondizioneUtente>
+
+  @hasMany(() => PrezzoUtente)
+  declare prezzi: HasMany<typeof PrezzoUtente>
+
+  @hasMany(() => PeriodoBudget)
+  declare periodiBudget: HasMany<typeof PeriodoBudget>
+
+  @hasMany(() => Lista)
+  declare liste: HasMany<typeof Lista>
 
   get initials() {
     const [first, last] = this.fullName ? this.fullName.split(' ') : this.email.split('@')

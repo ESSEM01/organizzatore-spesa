@@ -81,6 +81,8 @@ Monorepo npm workspaces (D6), Node ≥ 24.
 | `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, auth con access token. Database: SQLite locale (`tmp/db.sqlite3`) in sviluppo e test, Turso in produzione con `DB_CONNECTION=libsql` + `LIBSQL_URL` + `LIBSQL_AUTH_TOKEN` (D8) | Japa |
 | `data/volantini/` | PDF dei volantini per prove e fixture, esclusi da git | – |
 
+Database: schema in `.omc/plans/database-schema.md` (D9), migrazioni in `apps/api/database/migrations/`, a fasi. Fase 1 fatta (negozi, prodotti, prezzi utente, budget per periodo, liste). Modelli in `apps/api/app/models/`: dichiarano sempre `static table` (i nomi sono italiani). I test API usano `tmp/test.sqlite3`.
+
 Comandi dalla radice:
 - `npm test`: tutti i test.
 - `npm run dev:web` (Vite, proxy `/api` → `localhost:3333`) e `npm run dev:api`.

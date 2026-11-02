@@ -16,3 +16,6 @@ coverage/
 
 # Service worker generato da vite-plugin-pwa in sviluppo
 dev-dist/
+
+# Stato di sessione di oh-my-claudecode (i piani in .omc/plans restano versionati)
+**/.omc/state/

@@ -24,7 +24,8 @@ const dbConfig = defineConfig({
       client: 'better-sqlite3',
 
       connection: {
-        filename: app.tmpPath('db.sqlite3'),
+        // I test usano un file separato, ricreato a ogni esecuzione: non toccano i dati di sviluppo.
+        filename: app.tmpPath(app.inTest ? 'test.sqlite3' : 'db.sqlite3'),
       },
 
       /**

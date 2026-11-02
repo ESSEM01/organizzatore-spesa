@@ -222,6 +222,24 @@ organizzatore-spesa/
 
 **Fatto.** Database creato dall'utente, URL e token in `apps/api/.env`, migrazioni eseguite su Turso.
 
+## D9 · Struttura del database (2026-11-02)
+
+**Decisione.** Schema completo progettato in `.omc/plans/database-schema.md`, creato **a fasi**:
+1. negozi, prodotti, prezzi manuali, budget, liste (**fatta**);
+2. volantini, offerte, stime Osservaprezzi;
+3. ricette, dieta, registro LLM;
+4. scontrini.
+
+**Scelte dell'utente.** Budget **per periodo** (`periodi_budget`, le liste lo consumano). Ricette **salvate** e collegate alla spesa, con flag **preferita**.
+
+**Regole dello schema.**
+- Tabelle del dominio in italiano, come `@spesa/domain`. Importi `*_centesimi` interi con `CHECK >= 0`; giorni come `date` (`AAAA-MM-GG`).
+- Dati comuni (catene, negozi, prodotti, offerte, stime) senza `user_id`; dati personali con `user_id` e `ON DELETE CASCADE`.
+- D5 garantita dallo schema: nessuna colonna per posizione dell'utente, foto, numeri di carta, prompt o risposte LLM. Test di guardia in `tests/functional/database/vincoli.spec.ts`.
+- Il database non sceglie il prezzo: `app/services/prezzi_repository.ts` restituisce `Prezzo[]` e decide `risolviPrezzo`.
+
+**Verificato.** Migrazioni su SQLite locale e su Turso; su Turso chiavi esterne (`PRAGMA foreign_keys = 1`), `CHECK` ed enum sono applicati. I test usano `tmp/test.sqlite3`, ricreato a ogni esecuzione.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

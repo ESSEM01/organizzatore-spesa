@@ -8,18 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = [
-    'abilities',
-    'createdAt',
-    'expiresAt',
-    'hash',
-    'id',
-    'lastUsedAt',
-    'name',
-    'tokenableId',
-    'type',
-    'updatedAt',
-  ] as const
+  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
   @column()
   declare abilities: string
@@ -43,6 +32,193 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class CateneSchema extends BaseModel {
+  static $columns = ['codice', 'createdAt', 'id', 'modalitaOfferte', 'nome', 'updatedAt', 'urlVolantini'] as const
+  $columns = CateneSchema.$columns
+  @column()
+  declare codice: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare modalitaOfferte: string
+  @column()
+  declare nome: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare urlVolantini: string | null
+}
+
+export class CondizioniUtenteSchema extends BaseModel {
+  static $columns = ['catenaId', 'condizione', 'createdAt', 'id', 'updatedAt', 'userId'] as const
+  $columns = CondizioniUtenteSchema.$columns
+  @column()
+  declare catenaId: number | null
+  @column()
+  declare condizione: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class ListeSchema extends BaseModel {
+  static $columns = ['createdAt', 'dataSpesa', 'id', 'negozioId', 'nome', 'periodoBudgetId', 'stato', 'updatedAt', 'userId'] as const
+  $columns = ListeSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare dataSpesa: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare negozioId: number | null
+  @column()
+  declare nome: string
+  @column()
+  declare periodoBudgetId: number | null
+  @column()
+  declare stato: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class NegoziSchema extends BaseModel {
+  static $columns = ['aggiornatoIl', 'catenaId', 'comune', 'createdAt', 'id', 'indirizzo', 'lat', 'lon', 'nome', 'osmId', 'provincia', 'updatedAt'] as const
+  $columns = NegoziSchema.$columns
+  @column.dateTime()
+  declare aggiornatoIl: DateTime
+  @column()
+  declare catenaId: number | null
+  @column()
+  declare comune: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare indirizzo: string | null
+  @column()
+  declare lat: number
+  @column()
+  declare lon: number
+  @column()
+  declare nome: string
+  @column()
+  declare osmId: string
+  @column()
+  declare provincia: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class NegoziUtenteSchema extends BaseModel {
+  static $columns = ['codicePuntoVendita', 'createdAt', 'id', 'negozioId', 'updatedAt', 'userId'] as const
+  $columns = NegoziUtenteSchema.$columns
+  @column()
+  declare codicePuntoVendita: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare negozioId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class PeriodiBudgetSchema extends BaseModel {
+  static $columns = ['al', 'budgetCentesimi', 'createdAt', 'dal', 'id', 'updatedAt', 'userId'] as const
+  $columns = PeriodiBudgetSchema.$columns
+  @column.date()
+  declare al: DateTime
+  @column()
+  declare budgetCentesimi: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare dal: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class PreferenzeUtenteSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'provincia', 'updatedAt', 'userId'] as const
+  $columns = PreferenzeUtenteSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare provincia: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class PrezziUtenteSchema extends BaseModel {
+  static $columns = ['centesimi', 'createdAt', 'data', 'fonte', 'id', 'negozioId', 'prodottoId', 'updatedAt', 'userId'] as const
+  $columns = PrezziUtenteSchema.$columns
+  @column()
+  declare centesimi: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare data: DateTime
+  @column()
+  declare fonte: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare negozioId: number
+  @column()
+  declare prodottoId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class ProdottiSchema extends BaseModel {
+  static $columns = ['categoria', 'codiceOff', 'createdAt', 'creatoDaUserId', 'id', 'marca', 'nome', 'quantitaConfezione', 'unita', 'updatedAt'] as const
+  $columns = ProdottiSchema.$columns
+  @column()
+  declare categoria: string | null
+  @column()
+  declare codiceOff: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare creatoDaUserId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare marca: string | null
+  @column()
+  declare nome: string
+  @column()
+  declare quantitaConfezione: number | null
+  @column()
+  declare unita: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
@@ -56,6 +232,27 @@ export class UserSchema extends BaseModel {
   declare id: number
   @column({ serializeAs: null })
   declare password: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class VociListaSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'listaId', 'prezzoPagatoCentesimi', 'prodottoId', 'quantita', 'spuntata', 'updatedAt'] as const
+  $columns = VociListaSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare listaId: number
+  @column()
+  declare prezzoPagatoCentesimi: number | null
+  @column()
+  declare prodottoId: number
+  @column()
+  declare quantita: number
+  @column()
+  declare spuntata: boolean
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
