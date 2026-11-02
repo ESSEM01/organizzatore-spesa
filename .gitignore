@@ -13,3 +13,6 @@ coverage/
 
 # Database locale
 *.sqlite3
+
+# Service worker generato da vite-plugin-pwa in sviluppo
+dev-dist/
