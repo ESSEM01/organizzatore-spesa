@@ -240,6 +240,31 @@ organizzatore-spesa/
 
 **Verificato.** Migrazioni su SQLite locale e su Turso; su Turso chiavi esterne (`PRAGMA foreign_keys = 1`), `CHECK` ed enum sono applicati. I test usano `tmp/test.sqlite3`, ricreato a ogni esecuzione.
 
+## D10 · Supermercati vicini dalla posizione (2026-11-02)
+
+**Decisione.** La prima funzione dell'app trova i supermercati vicini alla posizione del telefono, prima di prezzi e liste (scelta dell'utente).
+
+**Come funziona.**
+- La posizione si chiede solo quando l'utente tocca "Trova supermercati vicini", con precisione bassa (D5). Alternativa senza GPS: città o CAP scritti a mano, cercati con Nominatim.
+- Le coordinate si arrotondano a 3 decimali e la ricerca parte **dal telefono** verso OpenStreetMap: il backend non le riceve mai (D2, D5).
+- Ricerca con Overpass (`shop=supermarket|discount`, raggio 1, 2 o 5 km) su tre server pubblici in ordine, 8 secondi ciascuno. Se falliscono tutti, ripiego sulla ricerca `supermarket` di Nominatim, filtrata sul raggio, con un avviso che potrebbero mancare negozi. Il 2026-11-02 i tre server Overpass erano sovraccarichi e il ripiego ha restituito 31 negozi entro 2 km.
+- Comune e provincia (per Osservaprezzi, D1) vengono dal reverse geocoding di Nominatim sulla posizione arrotondata (`ISO3166-2-lvl6`, es. `IT-RM`).
+- Il riconoscimento della catena dal nome OSM (`catenaDaOsm`), la distanza e la conversione delle risposte sono funzioni pure in `packages/domain/src/negozi.ts`, con test.
+- Attribuzione obbligatoria "© contributori OpenStreetMap, ODbL" sotto i risultati.
+
+**Limiti.**
+- Nominatim consente al massimo una richiesta al secondo e vieta l'uso intensivo: va bene per un'app personale, non per molti utenti. In quel caso servirebbe un'istanza propria o un servizio a pagamento.
+- La provincia vale per la posizione dell'utente, non per ogni negozio: vicino ai confini provinciali può essere imprecisa.
+
+**Mappa interattiva (aggiunta il 2026-11-02, su richiesta dell'utente).**
+- **Leaflet 1.9.4 + react-leaflet 5** (compatibile con React 19), caricata solo quando ci sono risultati (`React.lazy`, ~45 KB compressi).
+- Tile raster di **OpenStreetMap** (`tile.openstreetmap.org`). La policy OSMF consente la consultazione interattiva con attribuzione visibile e Referer del browser; vieta uso offline e scaricamento anticipato. Il service worker quindi **non** mette in cache le tile. L'indirizzo è configurabile con `VITE_MAPPA_TILE_URL`, per passare a un altro fornitore se l'uso cresce.
+- Sulla mappa: area della ricerca (cerchio tratteggiato del raggio), posizione mostrata come **area di circa 100 m** e non come punto (D5), un marcatore per negozio. Toccare un negozio sulla mappa o nella lista lo evidenzia in entrambe.
+- Trascinando la mappa oltre un quarto del raggio compare **"Cerca in quest'area"**, che cerca attorno al nuovo centro. Mappa e lista restano visibili durante la ricerca.
+- Logica testata in `apps/web/src/features/negozi/vistaMappa.ts`; il componente è `Mappa.tsx`.
+
+**Prossimo passo.** Scegliere i "miei negozi" e salvarli nel database (`negozi`, `negozi_utente`), con login nella PWA.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

@@ -1,0 +1,253 @@
+import { lazy, Suspense, useId, useState, type FormEvent } from 'react'
+import type { NegozioVicino, Posizione } from '@spesa/domain'
+import { formatDistanza } from '../../lib/format'
+import { etichettaCatena } from './catene'
+import { cercaNegoziVicini, localitaDaPosizione, posizioneDaTesto, type Localita } from './osm'
+import { serveNuovaRicerca } from './vistaMappa'
+import type { OrigineRicerca } from './Mappa'
+import { chiediPosizione, ErrorePosizione } from './posizione'
+
+// Leaflet pesa: si scarica solo quando c'è una mappa da mostrare.
+const Mappa = lazy(() => import('./Mappa'))
+
+const RAGGI = [1000, 2000, 5000] as const
+
+type Stato =
+  | { tipo: 'iniziale' }
+  | { tipo: 'cerco'; messaggio: string }
+  | { tipo: 'errore'; messaggio: string }
+
+interface UltimaRicerca {
+  negozi: NegozioVicino[]
+  fonte: 'overpass' | 'nominatim'
+  localita: Localita | null
+  centro: Posizione
+  origine: OrigineRicerca
+}
+
+export function NegoziVicini() {
+  const [raggio, setRaggio] = useState<number>(2000)
+  const [testo, setTesto] = useState('')
+  const [stato, setStato] = useState<Stato>({ tipo: 'iniziale' })
+  const [selezionato, setSelezionato] = useState<string | null>(null)
+  const [centroMappa, setCentroMappa] = useState<Posizione | null>(null)
+  const idTesto = useId()
+  const occupato = stato.tipo === 'cerco'
+  // Mappa e lista restano visibili durante una nuova ricerca, finché non arrivano i risultati nuovi.
+  const [ultimi, setUltimi] = useState<UltimaRicerca | null>(null)
+
+  async function cerca(posizione: Posizione, origine: OrigineRicerca) {
+    setStato({ tipo: 'cerco', messaggio: 'Cerco i supermercati…' })
+    try {
+      const [esito, localita] = await Promise.all([
+        cercaNegoziVicini(posizione, raggio),
+        localitaDaPosizione(posizione).catch(() => null),
+      ])
+      // Il centro mostrato è quello arrotondato inviato a OSM, non la posizione precisa (D5).
+      const centro = { lat: Math.round(posizione.lat * 1000) / 1000, lon: Math.round(posizione.lon * 1000) / 1000 }
+      setUltimi({ negozi: esito.negozi, fonte: esito.fonte, localita, centro, origine })
+      setSelezionato(null)
+      setCentroMappa(null)
+      setStato({ tipo: 'iniziale' })
+    } catch (e) {
+      setStato({ tipo: 'errore', messaggio: e instanceof Error ? e.message : 'Ricerca non riuscita.' })
+    }
+  }
+
+  async function usaPosizione() {
+    setStato({ tipo: 'cerco', messaggio: 'Aspetto la posizione dal telefono…' })
+    try {
+      await cerca(await chiediPosizione(), 'gps')
+    } catch (e) {
+      setStato({ tipo: 'errore', messaggio: e instanceof ErrorePosizione ? e.message : 'Ricerca non riuscita.' })
+    }
+  }
+
+  async function usaTesto(e: FormEvent) {
+    e.preventDefault()
+    if (!testo.trim()) return
+    setStato({ tipo: 'cerco', messaggio: `Cerco “${testo.trim()}”…` })
+    try {
+      const posizione = await posizioneDaTesto(testo.trim())
+      if (!posizione) {
+        setStato({ tipo: 'errore', messaggio: `Non trovo “${testo.trim()}”. Prova con il nome della città o il CAP.` })
+        return
+      }
+      await cerca(posizione, 'testo')
+    } catch {
+      setStato({ tipo: 'errore', messaggio: 'Non riesco a cercare la località. Controlla la connessione.' })
+    }
+  }
+
+  return (
+    <section aria-labelledby="titolo-negozi" className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 id="titolo-negozi" className="text-xl font-semibold">
+          Supermercati vicini
+        </h2>
+        <p className="text-sm text-testo-tenue text-pretty">
+          Uso la posizione una sola volta, arrotondata a circa 100 m. Resta sul telefono e non viene salvata.
+        </p>
+      </div>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-1 text-sm font-medium">Raggio</legend>
+        <div className="grid grid-cols-3 gap-1 rounded-lg border border-bordo bg-superficie p-1">
+          {RAGGI.map((r) => (
+            <label
+              key={r}
+              className="flex min-h-11 cursor-pointer items-center justify-center rounded-md text-sm tabular-nums has-checked:bg-testo has-checked:text-fondo has-focus-visible:outline-2 has-focus-visible:outline-marca"
+            >
+              <input
+                type="radio"
+                name="raggio"
+                value={r}
+                checked={raggio === r}
+                onChange={() => setRaggio(r)}
+                className="sr-only"
+              />
+              {r / 1000} km
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <button
+        type="button"
+        onClick={usaPosizione}
+        disabled={occupato}
+        className="min-h-12 rounded-lg bg-marca px-4 text-base font-medium text-white disabled:opacity-60"
+      >
+        Trova supermercati vicini
+      </button>
+
+      <form onSubmit={usaTesto} className="flex flex-col gap-1">
+        <label htmlFor={idTesto} className="text-sm font-medium">
+          Oppure scrivi città o CAP
+        </label>
+        <div className="flex gap-2">
+          <input
+            id={idTesto}
+            value={testo}
+            onChange={(e) => setTesto(e.target.value)}
+            autoComplete="postal-code"
+            enterKeyHint="search"
+            placeholder="Es. 00147 o Roma"
+            className="min-h-11 min-w-0 flex-1 rounded-lg border border-bordo bg-superficie px-3 text-base"
+          />
+          <button
+            type="submit"
+            disabled={occupato || !testo.trim()}
+            className="min-h-11 rounded-lg border border-bordo bg-superficie px-4 font-medium disabled:opacity-60"
+          >
+            Cerca
+          </button>
+        </div>
+      </form>
+
+      <div aria-live="polite" className="flex flex-col gap-2">
+        {stato.tipo === 'cerco' && <p className="text-sm text-testo-tenue">{stato.messaggio}</p>}
+        {stato.tipo === 'errore' && (
+          <p role="alert" className="rounded-lg border border-sforamento/30 bg-sforamento/5 p-3 text-sm text-sforamento">
+            {stato.messaggio}
+          </p>
+        )}
+        {ultimi && (
+          <>
+            <div className="relative">
+              <Suspense fallback={<div className="h-72 rounded-lg border border-bordo bg-superficie" />}>
+                <Mappa
+                  centro={ultimi.centro}
+                  raggio={raggio}
+                  origine={ultimi.origine}
+                  negozi={ultimi.negozi}
+                  selezionato={selezionato}
+                  onSeleziona={setSelezionato}
+                  onCentroCambiato={setCentroMappa}
+                />
+              </Suspense>
+              {centroMappa && serveNuovaRicerca(ultimi.centro, centroMappa, raggio) && (
+                <button
+                  type="button"
+                  onClick={() => cerca(centroMappa, 'mappa')}
+                  disabled={occupato}
+                  className="absolute top-3 left-1/2 z-[1000] min-h-11 -translate-x-1/2 rounded-full border border-bordo bg-superficie px-4 text-sm font-medium shadow-sm disabled:opacity-70"
+                >
+                  {occupato ? 'Cerco…' : 'Cerca in quest’area'}
+                </button>
+              )}
+            </div>
+            <Risultati {...ultimi} raggio={raggio} selezionato={selezionato} onSeleziona={setSelezionato} />
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function Risultati({
+  negozi,
+  fonte,
+  localita,
+  raggio,
+  selezionato,
+  onSeleziona,
+}: {
+  negozi: NegozioVicino[]
+  fonte: 'overpass' | 'nominatim'
+  localita: Localita | null
+  raggio: number
+  selezionato: string | null
+  onSeleziona: (osmId: string) => void
+}) {
+  const dove = localita?.comune ? ` · ${localita.comune}${localita.provincia ? ` (${localita.provincia})` : ''}` : ''
+
+  if (negozi.length === 0) {
+    return (
+      <p className="text-sm text-testo-tenue">
+        Nessun supermercato entro {raggio / 1000} km{dove}. Prova un raggio più ampio.
+      </p>
+    )
+  }
+
+  return (
+    <>
+      <p className="text-sm text-testo-tenue">
+        <span className="tabular-nums">{negozi.length}</span> supermercati entro {raggio / 1000} km{dove}
+      </p>
+      {fonte === 'nominatim' && (
+        <p className="text-sm text-testo-tenue">
+          Il servizio principale è occupato: questi risultati vengono da una ricerca di riserva e potrebbero mancare
+          alcuni negozi.
+        </p>
+      )}
+      <ul className="divide-y divide-bordo border-y border-bordo">
+        {negozi.map((n) => (
+          <li key={n.osmId}>
+            <button
+              type="button"
+              aria-pressed={n.osmId === selezionato}
+              onClick={() => onSeleziona(n.osmId)}
+              className="flex min-h-11 w-full items-baseline justify-between gap-3 px-2 py-3 text-left aria-pressed:bg-marca/10"
+            >
+            <div className="min-w-0">
+              <p className="truncate font-medium">{n.nome}</p>
+              <p className="truncate text-sm text-testo-tenue">
+                {[etichettaCatena(n.nome, n.catena), n.indirizzo].filter(Boolean).join(' · ') || '—'}
+              </p>
+            </div>
+            <span className="shrink-0 text-right text-sm tabular-nums">{formatDistanza(n.distanzaMetri)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-testo-tenue">
+        Dati ©{' '}
+        <a href="https://www.openstreetmap.org/copyright" className="underline" target="_blank" rel="noreferrer">
+          contributori OpenStreetMap
+        </a>
+        , licenza ODbL.
+      </p>
+    </>
+  )
+}
