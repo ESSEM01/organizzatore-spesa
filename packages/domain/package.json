@@ -1,0 +1,23 @@
+{
+  "name": "@spesa/domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Logica di dominio pura: prezzi, budget, lista. Nessuna dipendenza da UI, framework o rete.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

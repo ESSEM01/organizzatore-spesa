@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Superficie "Operate": il colore va sui dati (risparmio, sforamento), non sulla cornice. */
+@theme {
+  --color-fondo: #f7f5f0;
+  --color-superficie: #ffffff;
+  --color-testo: #1c1f1d;
+  --color-testo-tenue: #5c635f;
+  --color-bordo: #dcd8cf;
+  --color-marca: #1f5f4a;
+  --color-risparmio: #1f7a4d;
+  --color-sforamento: #b3261e;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-fondo);
+    color: var(--color-testo);
+    -webkit-text-size-adjust: 100%;
+  }
+}
