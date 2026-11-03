@@ -95,6 +95,24 @@ test.group('importaVolantino', (group) => {
     assert.equal(Number(n), 1)
   })
 
+  test('con rileggi un volantino già letto si rilegge e le offerte si sostituiscono', async ({
+    assert,
+  }) => {
+    const l = lettore()
+    await importaVolantino('gros-ma-2026-10-23_2026-11-03.pdf', pdf, l.leggi)
+
+    const seconda = await importaVolantino('gros-ma-2026-10-23_2026-11-03.pdf', pdf, l.leggi, {
+      rileggi: true,
+    })
+
+    assert.equal(seconda.stato, 'letto')
+    assert.equal(l.chiamate(), 2)
+    const [{ n }] = await db.from('offerte').count('* as n')
+    assert.equal(Number(n), 1)
+    const [{ v }] = await db.from('volantini').count('* as v')
+    assert.equal(Number(v), 1)
+  })
+
   test('registra token e modello della richiesta, senza contenuti', async ({ assert }) => {
     await importaVolantino('gros-ma-2026-10-23_2026-11-03.pdf', pdf, lettore().leggi)
 

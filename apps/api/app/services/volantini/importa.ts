@@ -44,13 +44,14 @@ function dataValida(valore: string | null | undefined): string | null {
 export async function importaVolantino(
   nomeFile: string,
   pdf: Buffer,
-  leggi: LettoreVolantino
+  leggi: LettoreVolantino,
+  { rileggi = false }: { rileggi?: boolean } = {}
 ): Promise<EsitoImportazione> {
   const meta = metadatiDaNomeFile(nomeFile)
   const hash = createHash('sha256').update(pdf).digest('hex')
 
   const esistente = await Volantino.findBy('hashContenuto', hash)
-  if (esistente?.stato === 'letto') {
+  if (esistente?.stato === 'letto' && !rileggi) {
     return { file: nomeFile, stato: 'gia_letto', offerte: 0, scartate: 0 }
   }
 
@@ -112,6 +113,8 @@ export async function importaVolantino(
       richiestaLlmId: richiesta.id,
     })
     await volantino.save()
+    // Rilettura: le offerte della lettura precedente si sostituiscono, nella stessa transazione.
+    await Offerta.query({ client: trx }).where('volantinoId', volantino.id).delete()
     await Offerta.createMany(
       valide.map((o) => ({
         volantinoId: volantino.id,

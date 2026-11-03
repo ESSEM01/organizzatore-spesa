@@ -324,7 +324,13 @@ organizzatore-spesa/
 2. **Stime Osservaprezzi** per i freschi (D1): import mensile per provincia → `stime_osservaprezzi`.
 3. **Lista con l'IA e scelta del negozio**: catalogo con prezzi per catena, generazione, ricalcolo, classifica dei negozi sul telefono.
 
-**Stato del passo 1 (2026-11-03).** Comando `node ace volantini:leggi <pdf…>`: 13 volantini su 14 letti, 3.292 offerte salvate come `proposta`. Costo registrato in `richieste_llm` circa $9,90 (le risposte pesano più dei PDF). Le letture riuscite restano in cache su disco (`data/volantini/letture`, esclusa da git) per non ripagarle se il salvataggio su Turso fallisce; la lettura usa lo streaming perché le richieste lunghe senza stream cadevano in timeout. Da fare: lettura a blocchi di pagine per i volantini troppo grandi (GROS Pewex, risposta troncata) e rilettura di GROS MA (solo 27 offerte, probabilmente incompleto).
+**Stato del passo 1 (2026-11-03).** Comando `node ace volantini:leggi [--rileggi] <pdf…>`: 14 volantini su 14 letti, 4.601 offerte salvate come `proposta`. Costo registrato in `richieste_llm` circa $13 (le risposte pesano più dei PDF). Accorgimenti nati dalle prove:
+- lettura in streaming: le richieste lunghe senza stream cadevano in timeout;
+- lettura a **blocchi di 8 pagine**: con centinaia di offerte una sola risposta si troncava (GROS Pewex) o si fermava a metà (GROS MA: 27 offerte, 598 a blocchi);
+- ogni blocco letto resta in cache su disco (`data/volantini/letture`, esclusa da git), così un errore di rete o del database non fa ripagare i blocchi già letti;
+- `--rileggi` rilegge un volantino già salvato e ne sostituisce le offerte.
+
+Da valutare: i volantini letti prima dei blocchi potrebbero essere incompleti allo stesso modo (es. GROS Sacoph, 359 offerte contro 600-700 degli altri GROS).
 
 **Da chiarire prima della fase 3.** Per quante persone e per quanti giorni è la spesa; preferenze alimentari (dati sulla salute, D5).
 
