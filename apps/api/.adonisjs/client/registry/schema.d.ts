@@ -21,6 +21,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<unknown>
     }
   }
+  'negozi': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/negozi'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/negozi_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/negozi_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/negozi_controller').default['index']>>>
+    }
+  }
   'auth.new_account.store': {
     methods: ["POST"]
     pattern: '/api/v1/auth/signup'
@@ -47,6 +60,45 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'auth.email.password_dimenticata': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/password-dimenticata'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').passwordDimenticataValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').passwordDimenticataValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/email_controller').default['passwordDimenticata']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/email_controller').default['passwordDimenticata']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/email_controller').default['passwordDimenticata']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'auth.verificaEmail': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/verifica-email/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/email_controller').default['verifica']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/email_controller').default['verifica']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/email_controller').default['verifica']>>>
+    }
+  }
+  'auth.reimpostaPassword': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/reimposta-password/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').reimpostaPasswordValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').reimpostaPasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reimposta']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reimposta']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reimposta']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'profile.profile.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/account/profile'
@@ -71,6 +123,32 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
+    }
+  }
+  'profile.email.reinvia_verifica': {
+    methods: ["POST"]
+    pattern: '/api/v1/account/verifica-email'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reinviaVerifica']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reinviaVerifica']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/email_controller').default['reinviaVerifica']>>>
+    }
+  }
+  'profile.profile.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/account'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').cancellaAccountValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').cancellaAccountValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['destroy']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['destroy']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'mieiNegozi.miei_negozi.index': {

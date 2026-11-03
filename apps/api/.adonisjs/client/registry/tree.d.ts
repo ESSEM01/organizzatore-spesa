@@ -3,6 +3,7 @@ import type { routes } from './index.ts'
 
 export interface ApiDefinition {
   health: typeof routes['health']
+  negozi: typeof routes['negozi']
   auth: {
     newAccount: {
       store: typeof routes['auth.new_account.store']
@@ -10,13 +11,22 @@ export interface ApiDefinition {
     accessTokens: {
       store: typeof routes['auth.access_tokens.store']
     }
+    email: {
+      passwordDimenticata: typeof routes['auth.email.password_dimenticata']
+    }
+    verificaEmail: typeof routes['auth.verificaEmail']
+    reimpostaPassword: typeof routes['auth.reimpostaPassword']
   }
   profile: {
     profile: {
       show: typeof routes['profile.profile.show']
+      destroy: typeof routes['profile.profile.destroy']
     }
     accessTokens: {
       destroy: typeof routes['profile.access_tokens.destroy']
+    }
+    email: {
+      reinviaVerifica: typeof routes['profile.email.reinvia_verifica']
     }
   }
   mieiNegozi: {

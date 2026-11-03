@@ -369,9 +369,48 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 
 **Primo controllo (2026-11-03).** 13 volantini pubblicati, 9 letti, circa $8,60. Solo uno era davvero nuovo (Elite "Tutti in campo"): GROS ed Elite generano il PDF a ogni download, quindi i volantini già scaricati a mano avevano un hash diverso e sono stati riletti. Da qui in poi tutti hanno `url_fonte` e non si rileggono. Elite pubblica lo stesso volantino "Prezzi tondi" sotto due indirizzi (`prezzi-tondi-1eur-e-2eur-2` e `grandi-marche-al-costo-2`), che vengono letti entrambi. Dopo il controllo, su richiesta dell'utente, sono state cancellate le 8 copie doppie (le vecchie copie scaricate a mano e il secondo "Prezzi tondi") con le loro 3.421 offerte: restano 15 volantini e 4.660 offerte.
 
+**Doppioni riconosciuti dalle immagini (2026-11-03).** GROS ed Elite rigenerano il PDF a ogni download, ma le immagini delle pagine restano identiche byte per byte. Ogni volantino salva l'**impronta** delle sue immagini (`volantini.impronte`); un volantino nuovo per indirizzo che ha almeno l'**80% delle immagini** in comune con uno già letto e ancora valido della stessa catena non si legge (conteggio `doppioni` del controllo). I due "Prezzi tondi" di Elite ne hanno il 90% in comune (cambiano copertina e ultima pagina); volantini diversi lo 0%. `node ace volantini:impronte` calcola l'impronta dei volantini letti prima, dai PDF su disco: applicato a tutti i 15 su Turso.
+
 **Esclusi dal controllo automatico.**
 - **NaturaSì**: la pagina delle offerte è un'app JavaScript e l'elenco dei volantini arriva solo dall'interfaccia interna del sito, che non si usa. Resta il caricamento a mano.
 - **Coop**: il robots.txt vieta tutto (D7). Caricamento a mano.
+
+## D16 · Scelte per la lista, scontrini rimandati, sicurezza dell'account (2026-11-03)
+
+**Risposte dell'utente alle domande aperte di D13.**
+- **Durata**: la lista copre l'intervallo del budget scelto, **settimana o mese** (D12).
+- **Persone**: le sceglie l'utente nelle preferenze dell'account, predefinito 1.
+- **Dieta**: per ora l'app propone solo la **dieta mediterranea**. Altre diete e intolleranze verranno dopo, come preferenze (dati sulla salute, D5).
+
+**Scontrini (D3, fase 2): non si sviluppano.** Secondo l'utente servirebbero molti scontrini per dare prezzi utili e non vale la pena. Restano i prezzi inseriti a mano (fase 1), le offerte dei volantini (D7) e le medie Osservaprezzi (D1).
+
+**Sicurezza dell'account** (richiesta dell'utente: coprire le falle elencate il 2026-11-03):
+- **Email**: verifica dell'indirizzo e "password dimenticata" con link a scadenza, spediti con **Resend** (scelta dell'utente). Senza chiave `RESEND_API_KEY` il link si scrive solo nel log del server, per lo sviluppo.
+- **Tentativi di accesso limitati** per email e indirizzo IP.
+- **Cancellazione dell'account** con tutti i dati personali (negozi scelti, budget, liste, prezzi, preferenze).
+- **Sessione in un cookie `httpOnly`** al posto del token in `localStorage` (supera la nota di D11): uno script iniettato nella pagina non può leggerla.
+
+**Com'è fatta la sicurezza (verificata nel browser il 2026-11-03).**
+- Guardia di sessione `web` come predefinita, cookie `httpOnly`, `SameSite=Lax`, `secure` in produzione, durata 30 giorni. CORS con credenziali solo dalla PWA (in sviluppo `localhost:5173`, in produzione stesso dominio). Il token CSRF non serve: cookie `Lax` e API solo JSON.
+- Tentativi di accesso: 5 password sbagliate per email e IP bloccano per 15 minuti (`@adonisjs/limiter`, contatori nella tabella `rate_limits`). Registrazione limitata a 5 all'ora per IP, email (verifica, password dimenticata) a 3 ogni 15 minuti.
+- Link nelle email firmati e a scadenza (verifica 3 giorni, reset un'ora). Il link di reset contiene l'impronta della password attuale, quindi vale una volta sola. "Password dimenticata" risponde allo stesso modo se l'email esiste o no.
+- `DELETE /api/v1/account` con la password: cancella l'utente e, a cascata, negozi scelti, preferenze, condizioni, prezzi, budget e liste.
+- PWA: schermata `#account` (conferma dell'email, uscita, cancellazione), `#verifica-email` e `#reimposta-password` per i link. L'avviso "da confermare" compare accanto all'email.
+
+**Supermercati dal database (richiesta dell'utente).** `GET /api/v1/negozi` (pubblico) restituisce i negozi salvati (D14) e, per catena, i volantini validi oggi con il numero di offerte. La PWA lo scarica una volta e calcola le distanze sul telefono: la posizione non arriva al server (D5). Nella ricerca compaiono subito i negozi dell'archivio, con la riga "2 volantini · 158 offerte · fino all'8 nov"; OpenStreetMap completa poi l'elenco con gli altri supermercati. Se OSM non risponde restano quelli dell'archivio, con un avviso.
+
+**Perché OpenStreetMap è lento.** Overpass è un servizio pubblico gratuito, gestito da volontari e condiviso da tutto il mondo: quando è carico rifiuta le richieste o le mette in coda. L'app prova tre server (8 secondi ciascuno), poi ripiega su Nominatim. Il 2026-11-03 la ricerca ha impiegato circa 18 secondi passando dal ripiego.
+
+**Medie Osservaprezzi (D1).** Tabelle `stime_osservaprezzi` e `import_osservaprezzi` (registro). `node ace osservaprezzi:importa` legge la tabella HTML della pagina "Archivio rilevazioni" (prezzi con il punto decimale, quantità tra parentesi) per Roma e il mese più recente; lo fa anche il controllo settimanale (D15). Se il sito risponde con un'altra provincia o un altro mese non si salva nulla. Primo import: settembre 2026, 64 medie (7 alimentari, 50 ortofrutta, 7 ittici; cura della persona e della casa senza dati). Licenza CC-BY 3.0 IT secondo le note legali del sito, da confermare per i dati prima di distribuire l'app (D1); robots.txt non blocca la pagina.
+
+**Valori nutrizionali.**
+- Fonte: **CIQUAL 2020** (ANSES, licenza CC-BY 4.0, copia su Zenodo record 4770202; il sito ciqual.anses.fr era in errore il 2026-11-03). Scartate: le tabelle CREA (non riproducibili senza autorizzazione), BDA IEO (uso condizionato), Open Food Facts (prodotti di marca con codice a barre, non alimenti generici), USDA (solo inglese).
+- `apps/api/database/data/ciqual_2020.csv`: 3.186 alimenti, per 100 g kcal, proteine, carboidrati, zuccheri, grassi, saturi, fibre, sale. "Tracce" e "< x" contano 0. Dove CIQUAL non dà l'energia (794 alimenti, es. miele, mele) le kcal sono **calcolate** con i fattori del Reg. UE 1169/2011 e segnate `kcal_calcolate`; 94 piatti composti restano senza.
+- `apps/api/database/data/alimenti_it.csv`: 127 alimenti generici italiani con le espressioni che li riconoscono e il codice CIQUAL scelto cercando i nomi ufficiali (crudo/secco dove serve). Il pecorino non c'è: CIQUAL non ha valori. "Formaggio" generico usa la media dei formaggi CIQUAL.
+- `alimentoDaNome` (dominio) sceglie l'espressione più lunga a parole intere; `valoriPerQuantita` riporta i valori alla confezione. L'LLM non calcola valori nutrizionali (D4).
+- `node ace nutrizione:importa` carica i due CSV (tabelle `alimenti`, `alimenti_it`). Copertura sui dati reali: 98% delle medie Osservaprezzi, 62% delle offerte alimentari (mancano soprattutto formaggi e salumi con nomi di fantasia).
+
+**Problema trovato su Turso.** Con Node 24 il client di Turso (`@libsql/hrana-client` con `node-fetch` keep-alive) non riceveva mai le risposte oltre circa 300 righe, senza errore: una pagina dell'API sarebbe rimasta appesa. Corretto in `services/libsql.ts` (`usaFetchDiNode`) usando il `fetch` di Node: 4.660 offerte lette in una volta.
 
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).

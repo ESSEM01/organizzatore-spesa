@@ -24,3 +24,19 @@ export const loginValidator = vine.create({
   email: email(),
   password: vine.string(),
 })
+
+/** Password dimenticata: solo l'email (D16). */
+export const passwordDimenticataValidator = vine.create({
+  email: email(),
+})
+
+/** Nuova password dal link ricevuto per email (D16). */
+export const reimpostaPasswordValidator = vine.create({
+  password: password(),
+  passwordConfirmation: password().sameAs('password'),
+})
+
+/** Cancellare l'account chiede la password attuale (D16). */
+export const cancellaAccountValidator = vine.create({
+  password: vine.string(),
+})

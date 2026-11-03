@@ -8,6 +8,7 @@
 */
 
 import { middleware } from '#start/kernel'
+import { limitaEmail, limitaRegistrazione } from '#start/limiter'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
 
@@ -19,10 +20,25 @@ router
   .group(() => {
     router.get('health', () => ({ status: 'ok' })).as('health')
 
+    // Catalogo pubblico dei supermercati con i volantini validi (D14, D16): niente posizione
+    router.get('negozi', [controllers.Negozi, 'index']).as('negozi')
+
     router
       .group(() => {
-        router.post('signup', [controllers.NewAccount, 'store'])
+        router.post('signup', [controllers.NewAccount, 'store']).use(limitaRegistrazione)
         router.post('login', [controllers.AccessTokens, 'store'])
+        // Password dimenticata e link firmati delle email (D16)
+        router
+          .post('password-dimenticata', [controllers.Email, 'passwordDimenticata'])
+          .use(limitaEmail)
+        router
+          .post('verifica-email/:id', [controllers.Email, 'verifica'])
+          .where('id', router.matchers.number())
+          .as('verificaEmail')
+        router
+          .post('reimposta-password/:id', [controllers.Email, 'reimposta'])
+          .where('id', router.matchers.number())
+          .as('reimpostaPassword')
       })
       .prefix('auth')
       .as('auth')
@@ -31,6 +47,8 @@ router
       .group(() => {
         router.get('profile', [controllers.Profile, 'show'])
         router.post('logout', [controllers.AccessTokens, 'destroy'])
+        router.post('verifica-email', [controllers.Email, 'reinviaVerifica']).use(limitaEmail)
+        router.delete('/', [controllers.Profile, 'destroy'])
       })
       .prefix('account')
       .as('profile')

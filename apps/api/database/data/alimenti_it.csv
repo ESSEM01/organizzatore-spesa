@@ -1,0 +1,128 @@
+nome,parole,codice_ciqual,nota
+Pasta di semola,pasta|spaghetti|penne|fusilli|rigatoni|maccheroni|linguine|farfalle|tagliatelle secche|mezze maniche|paccheri|orecchiette|tortiglioni,9810,secca cruda
+Pasta integrale,pasta integrale|spaghetti integrali|penne integrali,9870,secca cruda
+Pasta fresca ripiena,ravioli|tortellini|cappelletti|agnolotti,25181,ripiena di formaggio
+Riso,riso|carnaroli|arborio|basmati|parboiled,9100,crudo
+Riso integrale,riso integrale,9102,crudo
+Farro,farro,9001,crudo
+Orzo perlato,orzo perlato|orzo,9321,crudo
+Cous cous,cous cous|couscous,9681,crudo
+Polenta,polenta|farina di mais,9614,precotta secca
+Farina di grano,farina,9435,tipo 00/0
+Pane,pane|baguette|filone|rosetta|ciabatta|pagnotta,7001,
+Pane integrale,pane integrale,7110,
+Pancarrè,pancarre|pan carre|pane in cassetta|pan bauletto,7210,
+Fette biscottate,fette biscottate,7300,
+Crackers,crackers|cracker,7351,
+Biscotti,biscotti|frollini,24041,generici per colazione
+Cereali per colazione,corn flakes|cornflakes|cereali,32014,
+Fiocchi d'avena,fiocchi d avena|avena,32140,
+Petto di pollo,petto di pollo|fesa di pollo|petto pollo|fettine di pollo,36017,crudo senza pelle
+Pollo intero,pollo intero|pollo,36016,crudo con pelle
+Cosce di pollo,cosce di pollo|fusi di pollo|sovracosce,36002,crude con pelle
+Tacchino,tacchino|fesa di tacchino,36304,fettine crude
+Manzo,manzo|bovino|vitellone|scottona|bistecca|fettine di manzo|roast beef,6201,crudo
+Carne macinata,macinato|carne macinata|macinata,6254,crudo 15% grassi
+Vitello,vitello,6521,fettine crude
+Maiale,maiale|lonza|braciole di maiale|costine|suino|carne suina|suina|suino,28100,braciola cruda
+Salsiccia,salsiccia|salsicce,30051,cruda di suino
+Wurstel,wurstel|würstel,30134,
+Prosciutto crudo,prosciutto crudo|crudo,28800,
+Prosciutto cotto,prosciutto cotto|cotto,28900,
+Salmone,salmone,26036,crudo allevato
+Merluzzo,merluzzo|baccala fresco|filetti di merluzzo|merluzzi,26043,crudo
+Nasello,nasello|naselli,26044,crudo
+Orata,orata|orate,26088,cruda allevata
+Spigola,spigola|branzino|spigole,26205,cruda
+Trota,trota|trote,27008,cruda allevata
+Alici,alici|acciughe,26079,crude
+Sardine,sardine,26065,crude
+Sgombro,sgombro|sgombri,26051,crudo
+Tonno all'olio,tonno all olio|tonno in olio|tonno,26245,in scatola sgocciolato
+Tonno al naturale,tonno al naturale,26181,in scatola sgocciolato
+Cozze,cozze,10026,crude
+Calamari,calamari|totani,10001,crudi
+Polpo,polpo|polipo,10018,crudo
+Bastoncini di pesce,bastoncini di pesce|bastoncini,26029,impanati surgelati crudi
+Uova,uova|uovo,22000,crude
+Latte parzialmente scremato,latte parzialmente scremato|latte ps|latte,19042,
+Latte intero,latte intero,19024,
+Yogurt bianco,yogurt|yogurt bianco,19593,
+Mozzarella,mozzarella|fiordilatte|fior di latte,19590,vaccina
+Mozzarella di bufala,mozzarella di bufala|bufala,19591,
+Parmigiano Reggiano,parmigiano|parmigiano reggiano,12120,
+Grana Padano,grana|grana padano,12123,
+Ricotta,ricotta,19585,
+Stracchino,stracchino|crescenza,12315,formaggio fresco spalmabile
+Burro,burro,16400,
+Olio extravergine d'oliva,olio extravergine|olio extra vergine|olio evo|olio di oliva,17270,
+Olive,olive,13033,verdi in salamoia
+Pomodori,pomodori|pomodoro|pomodori ramati|pomodori insalatari,20047,crudi
+Pomodorini,pomodorini|ciliegino|datterini,20172,crudi
+Passata di pomodoro,passata|passata di pomodoro,20170,
+Pelati,pelati|pomodori pelati,20048,in scatola sgocciolati
+Polpa di pomodoro,polpa di pomodoro|polpa,20169,in scatola
+Concentrato di pomodoro,concentrato di pomodoro,20068,
+Patate,patate|patata,4008,crude pelate
+Carote,carote|carota,20009,crude
+Zucchine,zucchine|zucchina,20020,crude
+Melanzane,melanzane|melanzana,20053,crude
+Peperoni,peperoni|peperone,20087,rossi crudi
+Insalata,insalata|lattuga|iceberg|gentile|trocadero,20031,lattuga cruda
+Rucola,rucola,20099,valori del songino (CIQUAL non ha la rucola)
+Spinaci,spinaci,20270,crudi
+Broccoli,broccoli|broccolo,20057,crudi
+Cavolfiore,cavolfiore|cavolfiori,20016,crudo
+Cavolo,cavolo|verza|cappuccio,20116,cavolo bianco crudo
+Finocchi,finocchi|finocchio,20028,crudi
+Cipolle,cipolle|cipolla|cipolle dorate,20239,crude
+Aglio,aglio|agli,11000,fresco
+Sedano,sedano,20023,crudo
+Cetrioli,cetrioli|cetriolo,20019,crudi
+Radicchio,radicchio|cicoria,20026,crudo
+Funghi,funghi|champignon,20056,crudi
+Zucca,zucca,20292,cotta
+Verdure miste surgelate,minestrone|verdure miste|misto per soffritto,20101,surgelate crude
+Piselli,piselli|pisellini,20036,in scatola sgocciolati
+Fagiolini,fagiolini,20070,surgelati crudi
+Fagioli,fagioli|borlotti|cannellini,20502,cotti
+Ceci,ceci,20507,cotti
+Lenticchie,lenticchie,20504,secche
+Mele,mele|mela|golden|fuji|gala|granny smith|renetta|stark|delicious,13050,crude
+Pere,pere|pera|abate|williams|kaiser|conference,13107,crude sbucciate
+Banane,banane|banana,13005,
+Arance,arance|arancia|arance navel|tarocco,13034,
+Clementine,clementine|mandarini|mandarino,13024,
+Limoni,limoni|limone,13009,
+Kiwi,kiwi,13021,
+Uva,uva,13044,bianca
+Fragole,fragole,13014,
+Pesche,pesche|pesca|nettarine|percoche,13195,a polpa gialla
+Albicocche,albicocche,13000,
+Ciliegie,ciliegie,13008,
+Ananas,ananas,13002,
+Meloni,melone|meloni,13026,
+Anguria,anguria|cocomero,13036,
+Fichi,fichi,13012,
+Cachi,cachi|kaki,13066,
+Melograno,melograno|melagrana,13018,
+Noci,noci,15005,secche sgusciate
+Mandorle,mandorle,15041,
+Zucchero,zucchero,31016,bianco
+Miele,miele,31008,
+Marmellata,marmellata|confettura,31006,
+Cioccolato fondente,cioccolato fondente|fondente,31074,oltre 70% di cacao
+Caffè macinato,caffe|caffe macinato,18003,in polvere
+Succo d'arancia,succo d arancia|spremuta,2070,
+Pizza margherita,pizza,25404,confezionata
+Vongole,vongole|lupini di mare,10017,crude
+Speck,speck,28801,prosciutto crudo affumicato
+Salame,salame|salamino|salami,30300,stagionato
+Mortadella,mortadella,30789,
+Formaggio (generico),formaggio|formaggi,12999,media dei formaggi CIQUAL: vale solo se il tipo non è riconosciuto
+Grissini,grissini,7525,
+Kefir,kefir,19865,
+Surimi,surimi,26046,
+Gelato,gelato|gelati,39515,in vaschetta
+Bietole,bieta|biete|bietole|erbette,20004,crude
+Cipollotti,cipollotto|cipollotti,11003,freschi

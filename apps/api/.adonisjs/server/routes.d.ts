@@ -5,10 +5,16 @@ type ParamValue = string | number | bigint | boolean
 export type ScannedRoutes = {
   ALL: {
     'health': { paramsTuple?: []; params?: {} }
+    'negozi': { paramsTuple?: []; params?: {} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
+    'auth.email.password_dimenticata': { paramsTuple?: []; params?: {} }
+    'auth.verificaEmail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'auth.reimpostaPassword': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'profile.email.reinvia_verifica': { paramsTuple?: []; params?: {} }
+    'profile.profile.destroy': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.store': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -26,6 +32,7 @@ export type ScannedRoutes = {
   }
   GET: {
     'health': { paramsTuple?: []; params?: {} }
+    'negozi': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
     'periodi.corrente': { paramsTuple?: []; params?: {} }
@@ -33,6 +40,7 @@ export type ScannedRoutes = {
   }
   HEAD: {
     'health': { paramsTuple?: []; params?: {} }
+    'negozi': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
     'periodi.corrente': { paramsTuple?: []; params?: {} }
@@ -41,7 +49,11 @@ export type ScannedRoutes = {
   POST: {
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
+    'auth.email.password_dimenticata': { paramsTuple?: []; params?: {} }
+    'auth.verificaEmail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'auth.reimpostaPassword': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'profile.email.reinvia_verifica': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.store': { paramsTuple?: []; params?: {} }
     'periodi.store': { paramsTuple?: []; params?: {} }
     'liste.store': { paramsTuple?: []; params?: {} }
@@ -49,6 +61,7 @@ export type ScannedRoutes = {
     'liste.aggiungi_prezzo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
+    'profile.profile.destroy': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'liste.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'voci.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -14,6 +14,12 @@ const routes = {
     tokens: [[0,"api"],[0,"v1"],[0,"health"]],
     types: placeholder as Registry['health']['types'],
   },
+  'negozi': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/negozi',
+    tokens: [[0,"api"],[0,"v1"],[0,"negozi"]],
+    types: placeholder as Registry['negozi']['types'],
+  },
   'auth.new_account.store': {
     methods: ["POST"],
     pattern: '/api/v1/auth/signup',
@@ -26,6 +32,24 @@ const routes = {
     tokens: [[0,"api"],[0,"v1"],[0,"auth"],[0,"login"]],
     types: placeholder as Registry['auth.access_tokens.store']['types'],
   },
+  'auth.email.password_dimenticata': {
+    methods: ["POST"],
+    pattern: '/api/v1/auth/password-dimenticata',
+    tokens: [[0,"api"],[0,"v1"],[0,"auth"],[0,"password-dimenticata"]],
+    types: placeholder as Registry['auth.email.password_dimenticata']['types'],
+  },
+  'auth.verificaEmail': {
+    methods: ["POST"],
+    pattern: '/api/v1/auth/verifica-email/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"auth"],[0,"verifica-email"],[1,"id"]],
+    types: placeholder as Registry['auth.verificaEmail']['types'],
+  },
+  'auth.reimpostaPassword': {
+    methods: ["POST"],
+    pattern: '/api/v1/auth/reimposta-password/:id',
+    tokens: [[0,"api"],[0,"v1"],[0,"auth"],[0,"reimposta-password"],[1,"id"]],
+    types: placeholder as Registry['auth.reimpostaPassword']['types'],
+  },
   'profile.profile.show': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/account/profile',
@@ -37,6 +61,18 @@ const routes = {
     pattern: '/api/v1/account/logout',
     tokens: [[0,"api"],[0,"v1"],[0,"account"],[0,"logout"]],
     types: placeholder as Registry['profile.access_tokens.destroy']['types'],
+  },
+  'profile.email.reinvia_verifica': {
+    methods: ["POST"],
+    pattern: '/api/v1/account/verifica-email',
+    tokens: [[0,"api"],[0,"v1"],[0,"account"],[0,"verifica-email"]],
+    types: placeholder as Registry['profile.email.reinvia_verifica']['types'],
+  },
+  'profile.profile.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/account',
+    tokens: [[0,"api"],[0,"v1"],[0,"account"]],
+    types: placeholder as Registry['profile.profile.destroy']['types'],
   },
   'mieiNegozi.miei_negozi.index': {
     methods: ["GET","HEAD"],

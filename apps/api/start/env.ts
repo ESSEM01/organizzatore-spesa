@@ -35,4 +35,15 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Controllo settimanale dei volantini nel server (D15): legge i nuovi con Claude, circa $1 l'uno
   CONTROLLO_VOLANTINI: Env.schema.boolean.optional(),
+
+  // Tentativi di accesso limitati (D16): contatori nel database, `memory` nei test
+  LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
+
+  // Email di verifica e di reset della password (D16) con Resend. Senza chiave i link vanno solo nel log
+  MAIL_MAILER: Env.schema.enum(['resend'] as const),
+  MAIL_FROM_NAME: Env.schema.string(),
+  MAIL_FROM_ADDRESS: Env.schema.string(),
+  RESEND_API_KEY: Env.schema.secret.optional(),
+  // Indirizzo della PWA, per i link nelle email
+  WEB_URL: Env.schema.string.optional({ format: 'url', tld: false }),
 })

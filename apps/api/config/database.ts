@@ -2,11 +2,14 @@ import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
 import { createRequire } from 'node:module'
 import env from '#start/env'
-import { libsqlFilename, rendiRigheModificabili } from '#services/libsql'
+import { libsqlFilename, rendiRigheModificabili, usaFetchDiNode } from '#services/libsql'
 
 if (env.get('DB_CONNECTION') === 'libsql') {
-  // Stesso modulo che carica il client libsql di Lucid: vedi rendiRigheModificabili.
-  rendiRigheModificabili(createRequire(import.meta.url)('@libsql/sqlite3').Statement)
+  // Stessi moduli che carica il client libsql di Lucid: vedi rendiRigheModificabili e usaFetchDiNode.
+  const richiedi = createRequire(import.meta.url)
+  rendiRigheModificabili(richiedi('@libsql/sqlite3').Statement)
+  const hrana = richiedi.resolve('@libsql/hrana-client')
+  usaFetchDiNode(createRequire(hrana)('@libsql/isomorphic-fetch'))
 }
 
 const dbConfig = defineConfig({

@@ -18,7 +18,8 @@ const corsConfig = defineConfig({
    * In production, keep an explicit allowlist (empty by default, so no
    * cross-origin browser access is allowed until configured).
    */
-  origin: app.inDev ? true : [],
+  // Con la sessione nel cookie solo la PWA può chiamare l'API con le credenziali (D16).
+  origin: app.inDev ? ['http://localhost:5173'] : [],
 
   /**
    * HTTP methods accepted for cross-origin requests.

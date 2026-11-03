@@ -41,6 +41,20 @@ export function rendiRigheModificabili(Statement: ConMetodi): void {
   proto[MARCATO] = true
 }
 
+type ModuloFetch = { fetch: unknown; Request: unknown; Headers: unknown }
+
+/**
+ * `@libsql/hrana-client` scarica le risposte con `@libsql/isomorphic-fetch`, che in Node usa
+ * node-fetch con connessioni keep-alive: con Node 24 una risposta oltre circa 300 righe non arriva
+ * mai, senza errore (verificato su Turso il 2026-11-03: 250 righe sì, 500 no). Il fetch di Node
+ * non ha il problema: si sostituisce nel modulo prima che il client lo legga.
+ */
+export function usaFetchDiNode(modulo: ModuloFetch): void {
+  modulo.fetch = globalThis.fetch
+  modulo.Request = globalThis.Request
+  modulo.Headers = globalThis.Headers
+}
+
 export function libsqlFilename(url: string | undefined, authToken?: string): string {
   let parsed: URL
   try {

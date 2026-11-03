@@ -23,7 +23,8 @@ const sessionConfig = defineConfig({
    * Define how long to keep the session data alive without
    * any activity.
    */
-  age: '2h',
+  // La spesa si fa ogni giorno: la sessione dura un mese dall'ultimo uso.
+  age: '30 days',
 
   /**
    * Configuration for session cookie and the

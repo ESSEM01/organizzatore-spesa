@@ -1,12 +1,10 @@
 /**
- * Client dell'API AdonisJS (`/api/v1`, in sviluppo dietro il proxy di Vite).
- * Il token di accesso sta in localStorage: semplice e adatto all'uso personale, ma leggibile da
- * uno script iniettato nella pagina (XSS). Se l'app diventa pubblica valutare un cookie httpOnly (D11).
+ * Client dell'API AdonisJS (`/api/v1`, in sviluppo dietro il proxy di Vite, in produzione sullo
+ * stesso dominio). La sessione sta in un cookie httpOnly che il browser manda da solo: nessun token
+ * in JavaScript, quindi uno script iniettato nella pagina non può rubarla (D16, supera D11).
  */
 const BASE = '/api/v1'
-const CHIAVE_TOKEN = 'spesa.token'
 
-type Archivio = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 type Metodo = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export class ErroreApi extends Error {
@@ -35,47 +33,21 @@ function erroreDa(status: number, corpo: CorpoErrore | null): ErroreApi {
   return new ErroreApi(status, messaggio, campi)
 }
 
-function archivioSicuro(a: Archivio): Archivio {
-  // localStorage può lanciare eccezioni (navigazione privata, dati del sito bloccati).
-  return {
-    getItem: (k) => {
-      try {
-        return a.getItem(k)
-      } catch {
-        return null
-      }
-    },
-    setItem: (k, v) => {
-      try {
-        a.setItem(k, v)
-      } catch {
-        /* resta solo in memoria per questa sessione */
-      }
-    },
-    removeItem: (k) => {
-      try {
-        a.removeItem(k)
-      } catch {
-        /* niente da fare */
-      }
-    },
-  }
-}
-
-export function creaApi(f: typeof fetch = (...a) => fetch(...a), archivio: Archivio = localStorage) {
-  const memoria = archivioSicuro(archivio)
-
+export function creaApi(f: typeof fetch = (...a) => fetch(...a)) {
+  /**
+   * `percorso` è relativo a /api/v1, oppure un percorso completo dell'API già pronto (i link firmati
+   * delle email, che vanno usati così come sono).
+   */
   async function richiesta<T = unknown>(metodo: Metodo, percorso: string, corpo?: unknown): Promise<T> {
     const headers = new Headers({ Accept: 'application/json' })
-    const token = memoria.getItem(CHIAVE_TOKEN)
-    if (token) headers.set('Authorization', `Bearer ${token}`)
     if (corpo !== undefined) headers.set('Content-Type', 'application/json')
 
     let r: Response
     try {
-      r = await f(`${BASE}${percorso}`, {
+      r = await f(percorso.startsWith('/api/') ? percorso : `${BASE}${percorso}`, {
         method: metodo,
         headers,
+        credentials: 'same-origin',
         ...(corpo !== undefined && { body: JSON.stringify(corpo) }),
       })
     } catch {
@@ -84,19 +56,11 @@ export function creaApi(f: typeof fetch = (...a) => fetch(...a), archivio: Archi
 
     if (r.status === 204) return null as T
     const json = (await r.json().catch(() => null)) as ({ data?: T } & CorpoErrore) | null
-    if (!r.ok) {
-      if (r.status === 401) memoria.removeItem(CHIAVE_TOKEN)
-      throw erroreDa(r.status, json)
-    }
+    if (!r.ok) throw erroreDa(r.status, json)
     return (json?.data ?? null) as T
   }
 
-  return {
-    richiesta,
-    salvaToken: (token: string) => memoria.setItem(CHIAVE_TOKEN, token),
-    dimenticaToken: () => memoria.removeItem(CHIAVE_TOKEN),
-    haToken: () => memoria.getItem(CHIAVE_TOKEN) !== null,
-  }
+  return { richiesta }
 }
 
 export type Api = ReturnType<typeof creaApi>

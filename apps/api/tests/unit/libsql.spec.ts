@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { libsqlFilename, rendiRigheModificabili } from '#services/libsql'
+import { libsqlFilename, rendiRigheModificabili, usaFetchDiNode } from '#services/libsql'
 
 /** Riga come la costruisce @libsql/hrana-client: indici non enumerabili, colonne in sola lettura. */
 function rigaHrana(colonne: Record<string, unknown>) {
@@ -103,5 +103,17 @@ test.group('libsqlFilename', () => {
   test('rifiuta un URL mancante o con uno schema non supportato', ({ assert }) => {
     assert.throws(() => libsqlFilename(undefined, 'x'), /LIBSQL_URL/)
     assert.throws(() => libsqlFilename('postgres://db.example.com', 'x'), /LIBSQL_URL/)
+  })
+})
+
+test.group('usaFetchDiNode', () => {
+  test('sostituisce fetch, Request e Headers del modulo con quelli di Node', ({ assert }) => {
+    const modulo = { fetch: () => 'node-fetch', Request: class {}, Headers: class {} }
+
+    usaFetchDiNode(modulo)
+
+    assert.strictEqual(modulo.fetch, globalThis.fetch)
+    assert.strictEqual(modulo.Request, globalThis.Request)
+    assert.strictEqual(modulo.Headers, globalThis.Headers)
   })
 })

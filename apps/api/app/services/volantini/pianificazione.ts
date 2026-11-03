@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import ControlloVolantini from '#models/controllo_volantini'
 import { controllaVolantini, type Scaricatore } from '#services/volantini/controlla'
 import { conRiconnessione, lettoreVolantini } from '#services/volantini/lettore'
+import { importaOsservaprezzi, scaricaOsservaprezzi } from '#services/osservaprezzi/importa'
 
 /**
  * Controllo settimanale dei volantini (D15): quando è dovuto, e la sua esecuzione con la rete vera.
@@ -67,6 +68,16 @@ export async function eseguiControllo(
       cartella: join(radice, 'data/volantini', ora.toISODate()!),
       riprova: (azione) => conRiconnessione(azione, avviso),
     })
+    // Già che ci siamo, le medie mensili di Osservaprezzi (D16): gratis, un mese già importato si salta.
+    try {
+      const stime = await conRiconnessione(
+        () => importaOsservaprezzi({ scarica: scaricaOsservaprezzi, sigla: 'RM' }),
+        avviso
+      )
+      esito.errori.push(...stime.errori)
+    } catch (e) {
+      esito.errori.push(`Osservaprezzi: ${e instanceof Error ? e.message : String(e)}`)
+    }
     controllo.merge({
       esito: 'ok',
       finitoIl: DateTime.now(),

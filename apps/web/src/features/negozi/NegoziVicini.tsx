@@ -1,6 +1,7 @@
 import { lazy, Suspense, useId, useState, type FormEvent } from 'react'
 import type { NegozioVicino, Posizione } from '@spesa/domain'
 import { formatDistanza } from '../../lib/format'
+import { descriviVolantini, negoziEntroRaggio, scaricaCatalogo, unisciRisultati, type Catalogo } from './catalogo'
 import { etichettaCatena } from './catene'
 import { cercaNegoziVicini, localitaDaPosizione, posizioneDaTesto, type Localita } from './osm'
 import { serveNuovaRicerca } from './vistaMappa'
@@ -17,12 +18,16 @@ type Stato =
   | { tipo: 'cerco'; messaggio: string }
   | { tipo: 'errore'; messaggio: string }
 
+/** `archivio`: solo i negozi del database, in attesa di OSM; `archivio-solo`: OSM non ha risposto. */
+type Fonte = 'archivio' | 'archivio-solo' | 'overpass' | 'nominatim'
+
 interface UltimaRicerca {
   negozi: NegozioVicino[]
-  fonte: 'overpass' | 'nominatim'
+  fonte: Fonte
   localita: Localita | null
   centro: Posizione
   origine: OrigineRicerca
+  catalogo: Catalogo | null
 }
 
 interface PropsNegoziVicini {
@@ -45,19 +50,38 @@ export function NegoziVicini({ mieiOsmIds, onAggiungi }: PropsNegoziVicini) {
 
   async function cerca(posizione: Posizione, origine: OrigineRicerca) {
     setStato({ tipo: 'cerco', messaggio: 'Cerco i supermercati…' })
-    try {
-      const [esito, localita] = await Promise.all([
-        cercaNegoziVicini(posizione, raggio),
-        localitaDaPosizione(posizione).catch(() => null),
-      ])
-      // Il centro mostrato è quello arrotondato inviato a OSM, non la posizione precisa (D5).
-      const centro = { lat: Math.round(posizione.lat * 1000) / 1000, lon: Math.round(posizione.lon * 1000) / 1000 }
-      setUltimi({ negozi: esito.negozi, fonte: esito.fonte, localita, centro, origine })
+    // Il centro mostrato è quello arrotondato inviato a OSM, non la posizione precisa (D5).
+    const centro = { lat: Math.round(posizione.lat * 1000) / 1000, lon: Math.round(posizione.lon * 1000) / 1000 }
+    const localitaInArrivo = localitaDaPosizione(posizione).catch(() => null)
+
+    // Subito i negozi del nostro archivio (catene con volantino), calcolati sul telefono (D16).
+    const catalogo = await scaricaCatalogo().catch(() => null)
+    const archivio = catalogo ? negoziEntroRaggio(catalogo, centro, raggio) : []
+    if (archivio.length > 0) {
+      setUltimi({ negozi: archivio, fonte: 'archivio', localita: null, centro, origine, catalogo })
       setSelezionato(null)
       setCentroMappa(null)
+      setStato({ tipo: 'cerco', messaggio: 'Cerco gli altri supermercati su OpenStreetMap…' })
+    }
+
+    // Poi OpenStreetMap, più lento, completa con tutti gli altri supermercati.
+    try {
+      const esito = await cercaNegoziVicini(posizione, raggio)
+      const localita = await localitaInArrivo
+      setUltimi({ negozi: unisciRisultati(archivio, esito.negozi), fonte: esito.fonte, localita, centro, origine, catalogo })
+      if (archivio.length === 0) {
+        setSelezionato(null)
+        setCentroMappa(null)
+      }
       setStato({ tipo: 'iniziale' })
     } catch (e) {
-      setStato({ tipo: 'errore', messaggio: e instanceof Error ? e.message : 'Ricerca non riuscita.' })
+      if (archivio.length > 0) {
+        const localita = await localitaInArrivo
+        setUltimi({ negozi: archivio, fonte: 'archivio-solo', localita, centro, origine, catalogo })
+        setStato({ tipo: 'iniziale' })
+      } else {
+        setStato({ tipo: 'errore', messaggio: e instanceof Error ? e.message : 'Ricerca non riuscita.' })
+      }
     }
   }
 
@@ -203,6 +227,7 @@ function Risultati({
   negozi,
   fonte,
   localita,
+  catalogo,
   raggio,
   selezionato,
   onSeleziona,
@@ -210,8 +235,9 @@ function Risultati({
   onAggiungi,
 }: {
   negozi: NegozioVicino[]
-  fonte: 'overpass' | 'nominatim'
+  fonte: Fonte
   localita: Localita | null
+  catalogo: Catalogo | null
   raggio: number
   selezionato: string | null
   onSeleziona: (osmId: string) => void
@@ -247,6 +273,11 @@ function Risultati({
       <p className="text-sm text-testo-tenue">
         <span className="tabular-nums">{negozi.length}</span> supermercati entro {raggio / 1000} km{dove}
       </p>
+      {fonte === 'archivio-solo' && (
+        <p className="text-sm text-testo-tenue">
+          OpenStreetMap non risponde: vedi solo i supermercati delle catene di cui abbiamo i volantini.
+        </p>
+      )}
       {fonte === 'nominatim' && (
         <p className="text-sm text-testo-tenue">
           Il servizio principale è occupato: questi risultati vengono da una ricerca di riserva e potrebbero mancare
@@ -272,6 +303,11 @@ function Risultati({
               <p className="truncate text-sm text-testo-tenue">
                 {[etichettaCatena(n.nome, n.catena), n.indirizzo].filter(Boolean).join(' · ') || '—'}
               </p>
+              {catalogo && descriviVolantini(catalogo, n.catena) && (
+                <p className="truncate text-sm font-medium text-risparmio">
+                  {descriviVolantini(catalogo, n.catena)}
+                </p>
+              )}
             </div>
             <span className="shrink-0 text-right text-sm tabular-nums">{formatDistanza(n.distanzaMetri)}</span>
             </button>

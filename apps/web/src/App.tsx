@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { NegozioVicino } from '@spesa/domain'
 import { Accesso } from './features/account/Accesso'
+import { Account } from './features/account/Account'
+import { ReimpostaPassword, VerificaEmail } from './features/account/LinkEmail'
 import { ProviderAccount } from './features/account/contestoAccount'
 import { useAccount } from './features/account/usaAccount'
 import { MieiNegozi } from './features/negozi/MieiNegozi'
@@ -15,11 +17,19 @@ import {
 import { Spesa } from './features/spesa/Spesa'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
 
-type Scheda = 'spesa' | 'negozi'
+type Scheda = 'spesa' | 'negozi' | 'account' | 'verifica-email' | 'reimposta-password'
+const SCHEDE: readonly Scheda[] = ['spesa', 'negozi', 'account', 'verifica-email', 'reimposta-password']
 
-// La scheda aperta sta nell'indirizzo (#spesa, #negozi): sopravvive al ricaricamento e al tasto indietro.
+// La scheda aperta sta nell'indirizzo (#spesa, #negozi, #account): sopravvive al ricaricamento e al
+// tasto indietro. I link delle email aprono #verifica-email?url=… e #reimposta-password?url=… (D16).
 function schedaDaIndirizzo(): Scheda {
-  return location.hash === '#negozi' ? 'negozi' : 'spesa'
+  const nome = location.hash.slice(1).split('?')[0] as Scheda
+  return SCHEDE.includes(nome) ? nome : 'spesa'
+}
+function percorsoDaIndirizzo(): string | null {
+  const percorso = new URLSearchParams(location.hash.split('?')[1] ?? '').get('url')
+  // Solo percorsi della nostra API: un link manipolato non porta altrove.
+  return percorso?.startsWith('/api/v1/auth/') ? percorso : null
 }
 function iscrivitiIndirizzo(avvisa: () => void) {
   addEventListener('hashchange', avvisa)
@@ -81,10 +91,14 @@ function Schermata() {
         <h1 className="text-lg font-semibold">Spesa</h1>
         {connesso && (
           <div className="flex min-w-0 items-center gap-2 text-sm">
-            <span className="truncate text-testo-tenue">{stato.utente.email}</span>
-            <button type="button" onClick={esciEDimentica} className="min-h-11 shrink-0 rounded-lg px-2 font-medium">
-              Esci
-            </button>
+            <a href="#account" className="flex min-h-11 min-w-0 items-center gap-1 rounded-lg px-2">
+              <span className="truncate text-testo-tenue">{stato.utente.email}</span>
+              {!stato.utente.emailVerificataIl && (
+                <span className="shrink-0 font-medium text-sforamento" aria-label="email da confermare">
+                  ·&nbsp;da confermare
+                </span>
+              )}
+            </a>
           </div>
         )}
       </header>
@@ -99,6 +113,17 @@ function Schermata() {
               <p className="text-sm text-testo-tenue text-pretty">
                 Accedi per impostare il budget e preparare le liste della spesa.
               </p>
+              {stato.tipo === 'ospite' ? <Accesso /> : <p className="text-sm text-testo-tenue">Controllo l’accesso…</p>}
+            </section>
+          ))}
+        {scheda === 'verifica-email' && <VerificaEmail percorso={percorsoDaIndirizzo()} />}
+        {scheda === 'reimposta-password' && <ReimpostaPassword percorso={percorsoDaIndirizzo()} />}
+        {scheda === 'account' &&
+          (connesso ? (
+            <Account utente={stato.utente} onEsci={esciEDimentica} />
+          ) : (
+            <section className="flex flex-col gap-3">
+              <h2 className="text-xl font-semibold">Il tuo account</h2>
               {stato.tipo === 'ospite' ? <Accesso /> : <p className="text-sm text-testo-tenue">Controllo l’accesso…</p>}
             </section>
           ))}

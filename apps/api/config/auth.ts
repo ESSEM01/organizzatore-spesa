@@ -7,7 +7,8 @@ const authConfig = defineConfig({
   /**
    * Default guard used when no guard is explicitly specified.
    */
-  default: 'api',
+  // Sessione in un cookie httpOnly per la PWA (D16); la guardia a token resta per eventuali client.
+  default: 'web',
 
   guards: {
     /**

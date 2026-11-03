@@ -5,6 +5,7 @@ import Catena from '#models/catena'
 import Offerta from '#models/offerta'
 import RichiestaLlm from '#models/richiesta_llm'
 import Volantino from '#models/volantino'
+import { improntaDaSalvare } from '#services/volantini/impronta'
 import { metadatiDaNomeFile } from '#services/volantini/metadati'
 import { OffertaLetta, type VolantinoLetto } from '#services/volantini/schema'
 
@@ -50,13 +51,16 @@ export async function importaVolantino(
   const meta = metadatiDaNomeFile(nomeFile)
   const hash = createHash('sha256').update(pdf).digest('hex')
 
+  const impronte = await improntaDaSalvare(pdf)
+
   const esistente = await Volantino.findBy('hashContenuto', hash)
   if (esistente?.stato === 'letto' && !rileggi) {
     // Volantino scaricato a mano e ritrovato dal controllo settimanale: si ricorda da dove viene.
-    if (urlFonte && !esistente.urlFonte) {
-      esistente.urlFonte = urlFonte
-      await esistente.save()
-    }
+    esistente.merge({
+      urlFonte: esistente.urlFonte ?? urlFonte,
+      impronte: esistente.impronte ?? impronte,
+    })
+    if (esistente.$isDirty) await esistente.save()
     return { file: nomeFile, stato: 'gia_letto', offerte: 0, scartate: 0 }
   }
 
@@ -70,6 +74,7 @@ export async function importaVolantino(
       regione: meta.regione,
       file: nomeFile,
       urlFonte,
+      impronte,
       hashContenuto: hash,
       stato: 'da_leggere',
     }))

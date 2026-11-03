@@ -7,6 +7,60 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class AlimentiSchema extends BaseModel {
+  static $columns = ['carboidrati', 'codice', 'createdAt', 'fibre', 'fonte', 'grassi', 'gruppoEn', 'kcal', 'kcalCalcolate', 'nomeEn', 'proteine', 'sale', 'saturi', 'updatedAt', 'zuccheri'] as const
+  $columns = AlimentiSchema.$columns
+  @column()
+  declare carboidrati: number | null
+  @column({ isPrimary: true })
+  declare codice: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare fibre: number | null
+  @column()
+  declare fonte: string
+  @column()
+  declare grassi: number | null
+  @column()
+  declare gruppoEn: string | null
+  @column()
+  declare kcal: number | null
+  @column()
+  declare kcalCalcolate: boolean
+  @column()
+  declare nomeEn: string
+  @column()
+  declare proteine: number | null
+  @column()
+  declare sale: number | null
+  @column()
+  declare saturi: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare zuccheri: number | null
+}
+
+export class AlimentiItSchema extends BaseModel {
+  static $columns = ['alimentoCodice', 'createdAt', 'id', 'nome', 'nota', 'parole', 'updatedAt'] as const
+  $columns = AlimentiItSchema.$columns
+  @column()
+  declare alimentoCodice: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare nome: string
+  @column()
+  declare nota: string | null
+  @column()
+  declare parole: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
@@ -91,6 +145,33 @@ export class ControlliVolantiniSchema extends BaseModel {
   declare offerte: number
   @column()
   declare trovati: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ImportOsservaprezziSchema extends BaseModel {
+  static $columns = ['anno', 'createdAt', 'errore', 'eseguitoIl', 'esito', 'id', 'mese', 'provincia', 'righe', 'tipologia', 'updatedAt'] as const
+  $columns = ImportOsservaprezziSchema.$columns
+  @column()
+  declare anno: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare errore: string | null
+  @column.dateTime()
+  declare eseguitoIl: DateTime
+  @column()
+  declare esito: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare mese: number
+  @column()
+  declare provincia: string
+  @column()
+  declare righe: number
+  @column()
+  declare tipologia: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -291,6 +372,17 @@ export class ProdottiSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class RateLimitSchema extends BaseModel {
+  static $columns = ['expire', 'key', 'points'] as const
+  $columns = RateLimitSchema.$columns
+  @column()
+  declare expire: bigint | number | null
+  @column({ isPrimary: true })
+  declare key: string
+  @column()
+  declare points: number
+}
+
 export class RichiesteLlmSchema extends BaseModel {
   static $columns = ['createdAt', 'esito', 'id', 'modello', 'scopo', 'stopReason', 'tokenCacheLettura', 'tokenInput', 'tokenOutput', 'updatedAt', 'userId'] as const
   $columns = RichiesteLlmSchema.$columns
@@ -318,13 +410,48 @@ export class RichiesteLlmSchema extends BaseModel {
   declare userId: number | null
 }
 
+export class StimeOsservaprezziSchema extends BaseModel {
+  static $columns = ['anno', 'createdAt', 'id', 'maxCentesimi', 'medioCentesimi', 'mese', 'minCentesimi', 'prodottoId', 'provincia', 'quantita', 'tipologia', 'unita', 'updatedAt', 'voce'] as const
+  $columns = StimeOsservaprezziSchema.$columns
+  @column()
+  declare anno: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare maxCentesimi: number
+  @column()
+  declare medioCentesimi: number
+  @column()
+  declare mese: number
+  @column()
+  declare minCentesimi: number
+  @column()
+  declare prodottoId: number | null
+  @column()
+  declare provincia: string
+  @column()
+  declare quantita: number | null
+  @column()
+  declare tipologia: string
+  @column()
+  declare unita: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare voce: string
+}
+
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
+  static $columns = ['createdAt', 'email', 'emailVerificataIl', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
   declare email: string
+  @column.dateTime()
+  declare emailVerificataIl: DateTime | null
   @column()
   declare fullName: string | null
   @column({ isPrimary: true })
@@ -357,7 +484,7 @@ export class VociListaSchema extends BaseModel {
 }
 
 export class VolantiniSchema extends BaseModel {
-  static $columns = ['ambito', 'catenaId', 'createdAt', 'errore', 'file', 'hashContenuto', 'id', 'lettoIl', 'negozioId', 'regione', 'richiestaLlmId', 'stato', 'titolo', 'updatedAt', 'urlFonte', 'validoAl', 'validoDal'] as const
+  static $columns = ['ambito', 'catenaId', 'createdAt', 'errore', 'file', 'hashContenuto', 'id', 'impronte', 'lettoIl', 'negozioId', 'regione', 'richiestaLlmId', 'stato', 'titolo', 'updatedAt', 'urlFonte', 'validoAl', 'validoDal'] as const
   $columns = VolantiniSchema.$columns
   @column()
   declare ambito: string
@@ -373,6 +500,8 @@ export class VolantiniSchema extends BaseModel {
   declare hashContenuto: string
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare impronte: string | null
   @column.dateTime()
   declare lettoIl: DateTime | null
   @column()

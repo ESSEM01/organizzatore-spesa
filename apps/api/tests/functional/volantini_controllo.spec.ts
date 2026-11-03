@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import { mkdtemp, readdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { PDFDocument } from 'pdf-lib'
 import { controllaVolantini, type Scaricatore } from '#services/volantini/controlla'
 import type { LettoreVolantino } from '#services/volantini/importa'
 
@@ -131,5 +132,65 @@ test.group('controllaVolantini', (group) => {
     assert.equal(l.chiamate(), 0)
     assert.containsSubset(esito, { nuovi: 1, letti: 0 })
     assert.match(esito.errori[0], /massimo/)
+  })
+})
+
+test.group('controllaVolantini, doppioni', (group) => {
+  let cartella: string
+  group.each.setup(async () => {
+    cartella = await mkdtemp(join(tmpdir(), 'volantini-doppioni-'))
+    const annulla = await testUtils.db().withGlobalTransaction()
+    return async () => {
+      await annulla()
+      await rm(cartella, { recursive: true, force: true })
+    }
+  })
+
+  // PNG 1x1 di esempio: due immagini distinte.
+  const PNG = [
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==',
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  ].map((b) => Buffer.from(b, 'base64'))
+
+  async function pdfConImmagini(titolo: string) {
+    const doc = await PDFDocument.create()
+    doc.setTitle(titolo)
+    for (const png of PNG) {
+      const img = await doc.embedPng(png)
+      doc.addPage([100, 100]).drawImage(img, { x: 0, y: 0, width: 100, height: 100 })
+    }
+    return Buffer.from(await doc.save())
+  }
+
+  test('lo stesso volantino Elite sotto due indirizzi si legge una volta sola', async ({
+    assert,
+  }) => {
+    const base = 'https://superelite.it'
+    const pdfA = `${base}/index.php?option=com_myegojwt&view=flyer&id=1&pdf=1`
+    const pdfB = `${base}/index.php?option=com_myegojwt&view=flyer&id=2&pdf=1`
+    const pagineElite: Record<string, string> = {
+      [`${base}/promozioni`]: `
+        <a href="/promozioni/prezzi-tondi-2"><h3>Prezzi tondi</h3></a><div>Dal 30 Ottobre al 11 Novembre 2026</div>
+        <a href="/promozioni/grandi-marche-2"><h3>PREZZI TONDI 1€ e 2€</h3></a><div>Dal 30 Ottobre al 12 Novembre 2026</div>`,
+      [`${base}/promozioni/prezzi-tondi-2`]: `<a href='${pdfA}'>`,
+      [`${base}/promozioni/grandi-marche-2`]: `<a href='${pdfB}'>`,
+    }
+    const s: Scaricatore = {
+      testo: async (url) => pagineElite[url] ?? '',
+      // Ogni download rigenera il PDF (titolo diverso), le immagini restano le stesse.
+      pdf: async (url) => pdfConImmagini(url),
+    }
+    const l = lettore()
+
+    const esito = await controllaVolantini({
+      scarica: s,
+      leggi: l.leggi,
+      oggi: '2026-11-01',
+      cartella,
+      fonti: ['elite'],
+    })
+
+    assert.equal(l.chiamate(), 1)
+    assert.containsSubset(esito, { nuovi: 2, letti: 1, doppioni: 1, errori: [] })
   })
 })

@@ -8,7 +8,15 @@ import {
   pdfTodis,
   volantinoConad,
 } from '#services/volantini/fonti'
+import {
+  improntaDaSalvare,
+  leggiImpronta,
+  SOGLIA_DOPPIONE,
+  somiglianza,
+} from '#services/volantini/impronta'
 import { importaVolantino, type LettoreVolantino } from '#services/volantini/importa'
+import { metadatiDaNomeFile } from '#services/volantini/metadati'
+import Catena from '#models/catena'
 
 /** Accesso alla rete, finto nei test. */
 export interface Scaricatore {
@@ -147,8 +155,27 @@ export interface EsitoControllo {
   trovati: number
   nuovi: number
   letti: number
+  /** Volantini nuovi per indirizzo ma con le stesse immagini di uno già letto: non si leggono. */
+  doppioni: number
   offerte: number
   errori: string[]
+}
+
+/** Un volantino ancora valido della stessa catena con quasi tutte le stesse immagini. */
+async function doppione(nome: string, impronte: string | null, oggi: string) {
+  if (!impronte) return null
+  const catena = await Catena.findBy('codice', metadatiDaNomeFile(nome).catena)
+  if (!catena) return null
+  const letti = await Volantino.query()
+    .where('catenaId', catena.id)
+    .where('stato', 'letto')
+    .whereNotNull('impronte')
+    .where((q) => q.whereNull('validoAl').orWhere('validoAl', '>=', oggi))
+  return (
+    letti.find(
+      (v) => somiglianza(leggiImpronta(v.impronte), leggiImpronta(impronte)) >= SOGLIA_DOPPIONE
+    ) ?? null
+  )
 }
 
 /**
@@ -165,7 +192,14 @@ export async function controllaVolantini({
   massimo = 15,
   riprova = (azione) => azione(),
 }: OpzioniControllo): Promise<EsitoControllo> {
-  const esito: EsitoControllo = { trovati: 0, nuovi: 0, letti: 0, offerte: 0, errori: [] }
+  const esito: EsitoControllo = {
+    trovati: 0,
+    nuovi: 0,
+    letti: 0,
+    doppioni: 0,
+    offerte: 0,
+    errori: [],
+  }
   const daLeggere: Candidato[] = []
 
   for (const fonte of fonti) {
@@ -198,6 +232,13 @@ export async function controllaVolantini({
     const nome = nomeFile(c)
     try {
       const pdf = await scarica.pdf(c.pdf)
+      // Stesso volantino sotto un altro indirizzo (es. Elite "Prezzi tondi"): non si ripaga.
+      const impronte = await improntaDaSalvare(pdf)
+      const gia = await riprova(() => doppione(nome, impronte, oggi))
+      if (gia) {
+        esito.doppioni++
+        continue
+      }
       await writeFile(join(cartella, nome), pdf)
       const r = await riprova(() => importaVolantino(nome, pdf, leggi, { urlFonte: c.pdf }))
       if (r.stato === 'errore') {
