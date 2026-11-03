@@ -59,6 +59,17 @@ test.group('importaNegozi', (group) => {
     assert.closeTo(Number(way.lat), 41.86, 1e-6)
   })
 
+  test('senza elenco di catene salva tutti i supermercati, anche indipendenti', async ({
+    assert,
+  }) => {
+    const esito = await importaNegozi(risposta, { catene: null, comune: 'Roma', provincia: 'RM' })
+
+    assert.equal(esito.salvati, 4)
+    assert.deepEqual(esito.perCatena, { conad: 1, pewex: 1, lidl: 1, indipendenti: 1 })
+    const indipendente = await db.from('negozi').where('osm_id', 'node/13').first()
+    assert.isNull(indipendente.catena_id)
+  })
+
   test('una seconda importazione aggiorna i negozi invece di duplicarli', async ({ assert }) => {
     const opzioni = { catene: ['conad', 'pewex'], comune: 'Roma', provincia: 'RM' }
     await importaNegozi(risposta, opzioni)

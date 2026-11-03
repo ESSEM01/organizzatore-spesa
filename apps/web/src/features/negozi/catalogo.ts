@@ -11,6 +11,7 @@ export interface NegozioCatalogo {
   catena: string | null
   indirizzo: string | null
   comune: string | null
+  provincia: string | null
   lat: number
   lon: number
 }
@@ -36,7 +37,27 @@ export function scaricaCatalogo(api: Api = creaApi()): Promise<Catalogo> {
   return inArrivo
 }
 
-export function negoziEntroRaggio(c: Catalogo, centro: Posizione, raggioMetri: number): NegozioVicino[] {
+/**
+ * Vero se la posizione cade nella zona dei negozi salvati (oggi il comune di Roma, D17): lì l'archivio
+ * è completo e OpenStreetMap non serve. Fuori, la ricerca passa da OSM.
+ */
+export function copreArea(c: Catalogo, centro: Posizione): boolean {
+  if (c.negozi.length === 0) return false
+  const lat = c.negozi.map((n) => n.lat)
+  const lon = c.negozi.map((n) => n.lon)
+  return (
+    centro.lat >= Math.min(...lat) &&
+    centro.lat <= Math.max(...lat) &&
+    centro.lon >= Math.min(...lon) &&
+    centro.lon <= Math.max(...lon)
+  )
+}
+
+export function negoziEntroRaggio(
+  c: Catalogo,
+  centro: Posizione,
+  raggioMetri: number,
+): (NegozioCatalogo & NegozioVicino)[] {
   return c.negozi
     .map((n) => ({ ...n, distanzaMetri: distanzaMetri(centro, n) }))
     .filter((n) => n.distanzaMetri <= raggioMetri)

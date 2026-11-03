@@ -1,7 +1,14 @@
 import { lazy, Suspense, useId, useState, type FormEvent } from 'react'
 import type { NegozioVicino, Posizione } from '@spesa/domain'
 import { formatDistanza } from '../../lib/format'
-import { descriviVolantini, negoziEntroRaggio, scaricaCatalogo, unisciRisultati, type Catalogo } from './catalogo'
+import {
+  copreArea,
+  descriviVolantini,
+  negoziEntroRaggio,
+  scaricaCatalogo,
+  unisciRisultati,
+  type Catalogo,
+} from './catalogo'
 import { etichettaCatena } from './catene'
 import { cercaNegoziVicini, localitaDaPosizione, posizioneDaTesto, type Localita } from './osm'
 import { serveNuovaRicerca } from './vistaMappa'
@@ -18,8 +25,11 @@ type Stato =
   | { tipo: 'cerco'; messaggio: string }
   | { tipo: 'errore'; messaggio: string }
 
-/** `archivio`: solo i negozi del database, in attesa di OSM; `archivio-solo`: OSM non ha risposto. */
-type Fonte = 'archivio' | 'archivio-solo' | 'overpass' | 'nominatim'
+/**
+ * `completo`: zona coperta dall'archivio, nessuna richiesta a OSM (D17); `archivio`: negozi del database
+ * in attesa di OSM; `archivio-solo`: OSM non ha risposto.
+ */
+type Fonte = 'completo' | 'archivio' | 'archivio-solo' | 'overpass' | 'nominatim'
 
 interface UltimaRicerca {
   negozi: NegozioVicino[]
@@ -52,10 +62,23 @@ export function NegoziVicini({ mieiOsmIds, onAggiungi }: PropsNegoziVicini) {
     setStato({ tipo: 'cerco', messaggio: 'Cerco i supermercati…' })
     // Il centro mostrato è quello arrotondato inviato a OSM, non la posizione precisa (D5).
     const centro = { lat: Math.round(posizione.lat * 1000) / 1000, lon: Math.round(posizione.lon * 1000) / 1000 }
-    const localitaInArrivo = localitaDaPosizione(posizione).catch(() => null)
-
-    // Subito i negozi del nostro archivio (catene con volantino), calcolati sul telefono (D16).
     const catalogo = await scaricaCatalogo().catch(() => null)
+
+    // Nella zona dell'archivio (Roma) ci sono tutti i supermercati, aggiornati ogni settimana:
+    // la ricerca finisce qui, sul telefono, senza OpenStreetMap (D17).
+    if (catalogo && copreArea(catalogo, centro)) {
+      const negozi = negoziEntroRaggio(catalogo, centro, raggio)
+      const vicino = negozi[0] ?? catalogo.negozi.find((n) => n.comune)
+      const localita = vicino ? { comune: vicino.comune, provincia: vicino.provincia } : null
+      setUltimi({ negozi, fonte: 'completo', localita, centro, origine, catalogo })
+      setSelezionato(null)
+      setCentroMappa(null)
+      setStato({ tipo: 'iniziale' })
+      return
+    }
+
+    // Fuori zona: subito i negozi dell'archivio vicini, se ce ne sono, poi OpenStreetMap.
+    const localitaInArrivo = localitaDaPosizione(posizione).catch(() => null)
     const archivio = catalogo ? negoziEntroRaggio(catalogo, centro, raggio) : []
     if (archivio.length > 0) {
       setUltimi({ negozi: archivio, fonte: 'archivio', localita: null, centro, origine, catalogo })

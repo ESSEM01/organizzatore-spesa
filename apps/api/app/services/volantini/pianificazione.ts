@@ -4,6 +4,7 @@ import ControlloVolantini from '#models/controllo_volantini'
 import { controllaVolantini, type Scaricatore } from '#services/volantini/controlla'
 import { conRiconnessione, lettoreVolantini } from '#services/volantini/lettore'
 import { importaOsservaprezzi, scaricaOsservaprezzi } from '#services/osservaprezzi/importa'
+import { aggiornaNegoziRoma } from '#services/negozi/overpass'
 
 /**
  * Controllo settimanale dei volantini (D15): quando è dovuto, e la sua esecuzione con la rete vera.
@@ -68,6 +69,12 @@ export async function eseguiControllo(
       cartella: join(radice, 'data/volantini', ora.toISODate()!),
       riprova: (azione) => conRiconnessione(azione, avviso),
     })
+    // I supermercati di Roma da OpenStreetMap (D17): una richiesta a settimana, gratis.
+    try {
+      await conRiconnessione(() => aggiornaNegoziRoma(avviso), avviso)
+    } catch (e) {
+      esito.errori.push(`Supermercati: ${e instanceof Error ? e.message : String(e)}`)
+    }
     // Già che ci siamo, le medie mensili di Osservaprezzi (D16): gratis, un mese già importato si salta.
     try {
       const stime = await conRiconnessione(

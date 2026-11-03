@@ -31,6 +31,7 @@ export default class NegoziController {
         'catene.codice as catena',
         'negozi.indirizzo',
         'negozi.comune',
+        'negozi.provincia',
         'negozi.lat',
         'negozi.lon'
       )
@@ -75,8 +76,8 @@ export default class NegoziController {
       })
     }
 
-    // Dati pubblici che cambiano al massimo una volta al giorno.
-    response.header('Cache-Control', 'public, max-age=3600')
+    // Dati pubblici che cambiano al massimo una volta al giorno; 10 minuti di cache nel browser.
+    response.header('Cache-Control', 'public, max-age=600')
     return {
       data: {
         negozi: negozi.map((n) => ({
@@ -85,6 +86,7 @@ export default class NegoziController {
           catena: n.catena ?? null,
           indirizzo: n.indirizzo,
           comune: n.comune,
+          provincia: n.provincia,
           lat: Number(n.lat),
           lon: Number(n.lon),
         })),

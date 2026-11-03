@@ -412,6 +412,23 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 
 **Problema trovato su Turso.** Con Node 24 il client di Turso (`@libsql/hrana-client` con `node-fetch` keep-alive) non riceveva mai le risposte oltre circa 300 righe, senza errore: una pagina dell'API sarebbe rimasta appesa. Corretto in `services/libsql.ts` (`usaFetchDiNode`) usando il `fetch` di Node: 4.660 offerte lette in una volta.
 
+## D17 · Supermercati dal nostro archivio, non da OpenStreetMap in diretta (2026-11-03)
+
+**Richiesta dell'utente:** OpenStreetMap è troppo lento; usare altri progetti open source o Google Maps se serve.
+
+**Decisione.** Tutti i supermercati di Roma (775 il 2026-11-03: 225 indipendenti e 21 catene, comprese Lidl, Carrefour, Eurospin, Penny) stanno nel nostro database e si aggiornano **una volta a settimana** con una sola richiesta a Overpass (`node ace negozi:importa`, anche dentro il controllo settimanale di D15). Nella PWA, se la posizione cade nella zona dell'archivio, la ricerca si fa tutta sul telefono e finisce subito, senza richieste a OpenStreetMap; comune e provincia vengono dal negozio più vicino. Fuori zona resta la ricerca in diretta (archivio subito, poi OSM). Supera la scelta di D14 di salvare solo le catene con volantino.
+
+**Perché non Google Maps (Places API).**
+- La posizione dell'utente andrebbe a Google a ogni ricerca: contro D5.
+- I termini di Google Maps Platform vietano di salvare i dati dei luoghi (salvo l'identificativo), quindi niente archivio né collegamento con volantini e prezzi.
+- Ogni ricerca si paga oltre la soglia gratuita.
+
+**Perché non altri servizi in diretta.** Photon e Nominatim sono buoni per gli indirizzi ma non elencano bene i negozi per categoria; un'istanza Overpass propria richiede un server dedicato. Con l'archivio la velocità non dipende da nessun servizio esterno.
+
+**Verificato** nel browser: CAP 00147, 29 supermercati entro 2 km in circa 2 secondi, nessuna richiesta a Overpass. Il catalogo `GET /api/v1/negozi` resta 10 minuti nella cache del browser.
+
+**Limite.** La zona coperta è il rettangolo che contiene i negozi di Roma: ai bordi (es. Ciampino) si vedono solo i negozi di Roma vicini. Per coprire la città metropolitana basta allargare la query di `services/negozi/overpass.ts`.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

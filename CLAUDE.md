@@ -87,7 +87,7 @@ Comandi dalla radice:
 - `npm test`: tutti i test.
 - `npm run dev:web` (Vite, proxy `/api` → `localhost:3333`) e `npm run dev:api`.
 - `npm run build`: dominio, poi web, poi API.
-- Da `apps/api`, con `DB_CONNECTION=libsql` per Turso: `node ace volantini:leggi [--rileggi] <pdf…>` (D13), `node ace volantini:controlla` (controllo dei volantini nuovi, D15; lo fa da solo il server con `CONTROLLO_VOLANTINI=true`), `node ace negozi:importa` (supermercati di Roma, D14), `node ace osservaprezzi:importa` (medie mensili, D16), `node ace nutrizione:importa` (CIQUAL e alimenti italiani da `apps/api/database/data/`, D16). Leggere volantini costa circa $1 l'uno.
+- Da `apps/api`, con `DB_CONNECTION=libsql` per Turso: `node ace volantini:leggi [--rileggi] <pdf…>` (D13), `node ace volantini:controlla` (controllo dei volantini nuovi, D15; lo fa da solo il server con `CONTROLLO_VOLANTINI=true`), `node ace negozi:importa` (tutti i supermercati di Roma, D14 e D17), `node ace osservaprezzi:importa` (medie mensili, D16), `node ace nutrizione:importa` (CIQUAL e alimenti italiani da `apps/api/database/data/`, D16). Leggere volantini costa circa $1 l'uno.
 - Account (D16): sessione in cookie `httpOnly` (guardia `web`), niente token nella PWA. Email con Resend (`RESEND_API_KEY`); senza chiave i link finiscono nel log del server.
 - Dopo una modifica a `packages/domain`, ricompila (`npm run build -w @spesa/domain`) prima di usarla dall'API: l'API importa `dist/`.
 
