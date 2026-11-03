@@ -6,6 +6,8 @@
 | Solo nel server web e solo con CONTROLLO_VOLANTINI=true: ogni ora si guarda l'ultimo controllo
 | registrato nel database e, se è passata una settimana, se ne lancia uno. Il registro sta nel
 | database, quindi riavviare il server non fa ripartire il controllo (né la spesa per il modello).
+| Solo sul database vero (Turso, DB_CONNECTION=libsql): sul SQLite locale di sviluppo il registro è
+| vuoto e ogni avvio rileggerebbe e ripagherebbe tutti i volantini.
 |
 */
 
@@ -22,11 +24,15 @@ import {
 const OGNI_ORA = 60 * 60 * 1000
 const chiave = env.get('ANTHROPIC_API_KEY')?.release()
 
-if (env.get('CONTROLLO_VOLANTINI') && !chiave) {
+const attivo = env.get('CONTROLLO_VOLANTINI') === true
+
+if (attivo && env.get('DB_CONNECTION') !== 'libsql') {
+  logger.info('Controllo dei volantini spento: gira solo sul database Turso (DB_CONNECTION=libsql)')
+} else if (attivo && !chiave) {
   logger.warn(
     'CONTROLLO_VOLANTINI attivo ma manca ANTHROPIC_API_KEY: controllo dei volantini spento'
   )
-} else if (env.get('CONTROLLO_VOLANTINI') && chiave) {
+} else if (attivo && chiave) {
   let inCorso = false
 
   const verifica = async () => {
