@@ -16,8 +16,14 @@ export function Account({ utente, onEsci }: { utente: Utente; onEsci: () => Prom
   async function rispedisci() {
     setSpedito(null)
     try {
-      await reinviaVerifica()
-      setSpedito(`Ti abbiamo spedito un nuovo link a ${utente.email}.`)
+      const esito = await reinviaVerifica()
+      setSpedito(
+        esito.spedita
+          ? `Ti abbiamo spedito un nuovo link a ${utente.email}. Guarda anche nello spam.`
+          : esito.giaConfermata
+            ? 'La tua email risulta già confermata: ricarica la pagina.'
+            : 'Non sono riuscito a spedire l’email: le email non sono ancora attive su questo server. Riprova più tardi.',
+      )
     } catch (e) {
       setSpedito(e instanceof Error ? e.message : 'Non sono riuscito a spedire il link.')
     }

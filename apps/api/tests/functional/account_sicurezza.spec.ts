@@ -93,6 +93,15 @@ test.group('Account: sessione e sicurezza', (group) => {
     assert.isNotNull(u.emailVerificataIl)
   })
 
+  test('rispedire il link dice se l’email è partita davvero', async ({ client, assert }) => {
+    const u = await utente(false)
+
+    const r = await client.post('/api/v1/account/verifica-email').loginAs(u)
+
+    assert.deepEqual(r.body().data, { spedita: true, giaConfermata: false })
+    assert.lengthOf(posta.messages.sent(), 1)
+  })
+
   test('un link di verifica alterato non vale', async ({ client }) => {
     const u = await utente(false)
     await client.post('/api/v1/account/verifica-email').loginAs(u)

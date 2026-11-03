@@ -18,11 +18,12 @@ export interface Account {
   accedi: (email: string, password: string) => Promise<void>
   registrati: (email: string, password: string, passwordConfirmation: string) => Promise<void>
   esci: () => Promise<void>
-  /** Rispedisce il link di verifica all'utente connesso. */
-  reinviaVerifica: () => Promise<void>
+  /** Rispedisce il link di verifica; `spedita` è falso se il server non può spedire email. */
+  reinviaVerifica: () => Promise<{ spedita: boolean; giaConfermata: boolean }>
   /** Conferma l'email con il percorso firmato ricevuto nel link. */
   verificaEmail: (percorso: string) => Promise<void>
-  passwordDimenticata: (email: string) => Promise<void>
+  /** `emailAttive` è falso se il server non può spedire email: il link non arriverà. */
+  passwordDimenticata: (email: string) => Promise<{ emailAttive: boolean }>
   reimpostaPassword: (percorso: string, password: string, passwordConfirmation: string) => Promise<void>
   /** Cancella l'account e tutti i dati personali (D5, D16). */
   cancellaAccount: (password: string) => Promise<void>

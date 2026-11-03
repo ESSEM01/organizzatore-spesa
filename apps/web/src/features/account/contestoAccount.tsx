@@ -39,9 +39,8 @@ export function ProviderAccount({ children }: { children: ReactNode }) {
         await api.richiesta('POST', '/account/logout').catch(() => undefined)
         setStato({ tipo: 'ospite' })
       },
-      reinviaVerifica: async () => {
-        await api.richiesta('POST', '/account/verifica-email')
-      },
+      reinviaVerifica: () =>
+        api.richiesta<{ spedita: boolean; giaConfermata: boolean }>('POST', '/account/verifica-email'),
       verificaEmail: async (percorso) => {
         await api.richiesta('POST', percorso)
         // Se si è connessi si aggiorna il profilo, così sparisce l'avviso.
@@ -50,9 +49,8 @@ export function ProviderAccount({ children }: { children: ReactNode }) {
           setStato({ tipo: 'utente', utente })
         }
       },
-      passwordDimenticata: async (email) => {
-        await api.richiesta('POST', '/auth/password-dimenticata', { email })
-      },
+      passwordDimenticata: (email) =>
+        api.richiesta<{ emailAttive: boolean }>('POST', '/auth/password-dimenticata', { email }),
       reimpostaPassword: async (percorso, password, passwordConfirmation) => {
         await api.richiesta('POST', percorso, { password, passwordConfirmation })
       },

@@ -1,7 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
-import { improntaPassword, spedisciReimpostazione, spedisciVerifica } from '#services/account/email'
+import {
+  emailAttive,
+  improntaPassword,
+  spedisciReimpostazione,
+  spedisciVerifica,
+} from '#services/account/email'
 import { passwordDimenticataValidator, reimpostaPasswordValidator } from '#validators/user'
 
 const LINK_NON_VALIDO = 'Il link non è valido o è scaduto. Chiedine uno nuovo.'
@@ -22,16 +27,18 @@ export default class EmailController {
   /** Nuovo link di verifica per l'utente connesso. */
   async reinviaVerifica({ auth }: HttpContext) {
     const utente = auth.getUserOrFail()
-    if (!utente.emailVerificataIl) await spedisciVerifica(utente)
-    return { message: 'Ti abbiamo spedito il link' }
+    if (utente.emailVerificataIl) return { data: { spedita: false, giaConfermata: true } }
+    return { data: { spedita: await spedisciVerifica(utente), giaConfermata: false } }
   }
 
   /** Stessa risposta che l'email esista o no: non si rivela chi è registrato. */
   async passwordDimenticata({ request }: HttpContext) {
     const { email } = await request.validateUsing(passwordDimenticataValidator)
+    // Se il server non spedisce email lo si dice a tutti allo stesso modo: non rivela chi è registrato.
+    if (!emailAttive()) return { data: { emailAttive: false } }
     const utente = await User.findBy('email', email)
     if (utente) await spedisciReimpostazione(utente)
-    return { message: 'Se l’indirizzo è registrato ti abbiamo spedito un link' }
+    return { data: { emailAttive: true } }
   }
 
   /** Link della password dimenticata: vale un'ora e una volta sola (cambia l'impronta). */

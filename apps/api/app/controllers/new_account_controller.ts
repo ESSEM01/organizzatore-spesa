@@ -11,8 +11,8 @@ export default class NewAccountController {
     const user = await User.create({ fullName, email, password })
     await auth.use('web').login(user)
     // Si entra subito; la conferma dell'email arriva con il link (D16).
-    await spedisciVerifica(user)
+    const emailSpedita = await spedisciVerifica(user)
 
-    return serialize({ user: UserTransformer.transform(user) })
+    return serialize({ user: UserTransformer.transform(user), emailSpedita })
   }
 }

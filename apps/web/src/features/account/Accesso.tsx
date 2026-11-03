@@ -35,9 +35,13 @@ export function Accesso() {
       if (modo === 'accedi') await accedi(email, password)
       else if (modo === 'registrati') await registrati(email, password, conferma)
       else {
-        await passwordDimenticata(email)
+        const { emailAttive } = await passwordDimenticata(email)
         // Stessa frase che l'indirizzo esista o no: l'app non rivela chi è registrato.
-        setAvviso('Se l’indirizzo è registrato, ti abbiamo spedito un link per scegliere una nuova password. Vale un’ora.')
+        if (emailAttive) {
+          setAvviso('Se l’indirizzo è registrato, ti abbiamo spedito un link per scegliere una nuova password. Vale un’ora.')
+        } else {
+          setErrore('Le email non sono ancora attive su questo server: per ora non posso spedirti il link. Riprova più tardi.')
+        }
       }
     } catch (err) {
       if (err instanceof ErroreApi && Object.keys(err.campi).length > 0) setCampi(err.campi)
