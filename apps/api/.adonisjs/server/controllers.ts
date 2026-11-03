@@ -6,6 +6,7 @@
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
   Email: () => import('#controllers/email_controller'),
+  ListaIa: () => import('#controllers/lista_ia_controller'),
   Liste: () => import('#controllers/liste_controller'),
   MieiNegozi: () => import('#controllers/miei_negozi_controller'),
   Negozi: () => import('#controllers/negozi_controller'),

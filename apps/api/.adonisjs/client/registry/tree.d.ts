@@ -41,6 +41,12 @@ export interface ApiDefinition {
     store: typeof routes['periodi.store']
     update: typeof routes['periodi.update']
   }
+  listaIa: {
+    proposta: typeof routes['lista_ia.proposta']
+    salva: typeof routes['lista_ia.salva']
+    preferenze: typeof routes['lista_ia.preferenze']
+    aggiornaPreferenze: typeof routes['lista_ia.aggiorna_preferenze']
+  }
   liste: {
     store: typeof routes['liste.store']
     show: typeof routes['liste.show']

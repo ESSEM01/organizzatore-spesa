@@ -32,6 +32,10 @@ export interface Voce {
   quantita: number
   spuntata: boolean
   prodotto: { id: number; nome: string }
+  /** Grammi pianificati nelle liste preparate dall'IA (D18). */
+  grammi?: number | null
+  /** Prezzo stimato per il peso indicato, non per confezione. */
+  aPeso?: boolean
   prezzo: PrezzoRisolto | null
   totaleRigaCentesimi: number | null
 }

@@ -75,6 +75,12 @@ router
           .patch('periodi/:id', [controllers.Periodi, 'update'])
           .where('id', router.matchers.number())
 
+        // Lista preparata dall'IA e preferenze (D18)
+        router.post('liste/proposta', [controllers.ListaIa, 'proposta'])
+        router.post('liste/da-proposta', [controllers.ListaIa, 'salva'])
+        router.get('preferenze', [controllers.ListaIa, 'preferenze'])
+        router.patch('preferenze', [controllers.ListaIa, 'aggiornaPreferenze'])
+
         router.post('liste', [controllers.Liste, 'store'])
         router.get('liste/:id', [controllers.Liste, 'show']).where('id', router.matchers.number())
         router

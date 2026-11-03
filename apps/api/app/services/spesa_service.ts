@@ -2,7 +2,7 @@ import { risolviPrezzo, riepilogoBudget, totaleLista, type PrezzoRisolto } from 
 import type Lista from '#models/lista'
 import type Negozio from '#models/negozio'
 import type PeriodoBudget from '#models/periodo_budget'
-import { negozioDominio, prezziUtente } from '#services/prezzi_repository'
+import { negozioDominio, prezziPrevisti, prezziUtente } from '#services/prezzi_repository'
 
 /**
  * Calcoli della spesa: il database fornisce i dati, il dominio decide prezzi e totali (D4, D7).
@@ -40,10 +40,13 @@ export function listaJson(l: Lista) {
 
 export async function dettaglioLista(lista: Lista, userId: number, oggi: string) {
   const voci = lista.voci
-  const prezzi = await prezziUtente(
-    userId,
-    voci.map((v) => v.prodottoId)
-  )
+  const prezzi = [
+    ...(await prezziUtente(
+      userId,
+      voci.map((v) => v.prodottoId)
+    )),
+    ...(await prezziPrevisti(voci, lista.negozio ?? null, lista.createdAt.toISODate()!)),
+  ]
   // Senza negozio sulla lista si usano i prezzi degli altri negozi, segnalati come tali.
   const negozio = lista.negozio ? negozioDominio(lista.negozio) : { id: '', catena: '' }
   const prezzoDi = new Map<string, PrezzoRisolto | null>(
@@ -67,6 +70,9 @@ export async function dettaglioLista(lista: Lista, userId: number, oggi: string)
         quantita: v.quantita,
         spuntata: Boolean(v.spuntata),
         prodotto: { id: v.prodotto.id, nome: v.prodotto.nome },
+        // Liste preparate dall'IA (D18): grammi pianificati; con la stima si paga a peso, non a pezzo.
+        grammi: v.grammi,
+        aPeso: v.fontePrezzo === 'stima' && v.grammi !== null,
         prezzo,
         totaleRigaCentesimi: prezzo ? prezzo.centesimi * v.quantita : null,
       }

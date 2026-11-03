@@ -229,6 +229,58 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/periodi_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'lista_ia.proposta': {
+    methods: ["POST"]
+    pattern: '/api/v1/liste/proposta'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/lista_ia').propostaValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/lista_ia').propostaValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['proposta']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['proposta']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['proposta']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'lista_ia.salva': {
+    methods: ["POST"]
+    pattern: '/api/v1/liste/da-proposta'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/lista_ia').salvaPropostaValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/lista_ia').salvaPropostaValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['salva']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['salva']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['salva']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'lista_ia.preferenze': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/preferenze'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['preferenze']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['preferenze']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['preferenze']>>>
+    }
+  }
+  'lista_ia.aggiorna_preferenze': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/preferenze'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/lista_ia').preferenzeValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/lista_ia').preferenzeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['aggiornaPreferenze']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['aggiornaPreferenze']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lista_ia_controller').default['aggiornaPreferenze']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'liste.store': {
     methods: ["POST"]
     pattern: '/api/v1/liste'

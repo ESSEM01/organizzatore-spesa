@@ -5,6 +5,7 @@ import type { NegozioSalvato } from '../negozi/salvataggio'
 import { Budget } from './Budget'
 import { creaDatiSpesa, type PeriodoCorrente } from './datiSpesa'
 import { DettaglioLista } from './DettaglioLista'
+import { PreparaLista } from './PreparaLista'
 
 const breve = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short' })
 
@@ -60,6 +61,26 @@ export function Spesa({ api, mieiNegozi }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <Budget dati={dati} periodo={periodo} onCambiato={ricarica} />
+
+      {periodo &&
+        (mieiNegozi.length > 0 ? (
+          <PreparaLista
+            api={api}
+            periodoId={periodo.id}
+            onSalvata={(id) => {
+              setAperta(id)
+              void ricarica()
+            }}
+          />
+        ) : (
+          <p className="text-sm text-testo-tenue text-pretty">
+            Per preparare la lista con l’IA aggiungi i negozi dove fai la spesa nella scheda{' '}
+            <a href="#negozi" className="underline">
+              Negozi
+            </a>
+            .
+          </p>
+        ))}
 
       {periodo && (
         <section aria-labelledby="titolo-liste" className="flex flex-col gap-2">

@@ -429,6 +429,34 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 
 **Limite.** La zona coperta è il rettangolo che contiene i negozi di Roma: ai bordi (es. Ciampino) si vedono solo i negozi di Roma vicini. Per coprire la città metropolitana basta allargare la query di `services/negozi/overpass.ts`.
 
+## D18 · Lista preparata dall'IA (2026-11-03)
+
+**Scelte dell'utente.** Le offerte lette dai volantini si usano anche se nessuno le ha verificate, mostrate come "da volantino, non verificato" con la loro fonte. La lista si prepara **solo su richiesta** (bottone "Prepara la lista"), non in automatico, perché ogni proposta costa.
+
+**Come funziona (realizza la fase C di D13).**
+1. **Opzioni d'acquisto** (`services/spesa_ia/opzioni.ts`): per ogni negozio tra "I miei negozi", le offerte alimentari della catena valide nel periodo, abbinate a un alimento generico con `alimentoDaNome` (D16), più le medie Osservaprezzi dell'ultimo mese della provincia. Solo offerte con il peso della confezione (g/ml; a pezzi solo le uova, 60 g l'una).
+2. **Il modello sceglie cosa e quanto** (`pianificatore_claude.ts`, Claude Opus 5.5, output strutturato, effort basso): riceve budget residuo, persone, giorni rimasti del periodo e gli alimenti con un prezzo, con i valori per 100 g e il prezzo più basso al kg. Restituisce codici, grammi e priorità (1 essenziale, 2 importante, 3 rinunciabile) e una nota. Dieta mediterranea; a budget basso alimenti economici (D1: il budget decide). Codici non in elenco o quantità assurde si scartano.
+3. **Il dominio calcola** (`packages/domain/src/spesaIa.ts`), mai il modello (D4):
+   - `prezzaPiano`: per ogni alimento il modo più economico, a confezioni intere per le offerte, a peso per le stime;
+   - `riduciAlBudget`: toglie prima le voci di priorità 3, poi 2, dalla più cara; l'essenziale non si toglie e lo sforamento si dichiara;
+   - `riepilogoNutrizionale`: kcal e nutrienti a persona al giorno, quote di energia, quota della spesa con valori noti.
+4. **Il negozio lo sceglie il telefono** (`scegliNegozio`, regola di D13: budget rigido, poi totale + km × 1,50 €, a parità il più vicino). La posizione si chiede in quel momento e non lascia il telefono (D5); se manca si sceglie solo per prezzo e l'app lo dice.
+5. **Salvataggio** come lista del periodo per il negozio scelto: ogni voce conserva grammi, prezzo previsto, fonte e offerta. Il prezzo delle offerte si rilegge dal database, non dal client. Nel dettaglio della lista i prezzi previsti passano da `risolviPrezzo`, quindi un prezzo inserito dall'utente nel negozio vale più di una stima.
+
+**API.** `POST /api/v1/liste/proposta` (`periodoId`), `POST /api/v1/liste/da-proposta`, `GET` e `PATCH /api/v1/preferenze` (`persone`, 1-12). Ogni proposta si registra in `richieste_llm` con `scopo = 'lista'` (solo token, D5). Senza `ANTHROPIC_API_KEY` la proposta risponde 503.
+
+**Costo.** Circa $0,04 a proposta nella prova (3.326 token in ingresso, 1.227 in uscita); con tutti gli alimenti dei negozi reali intorno a $0,05.
+
+**Verificato il 2026-11-03.**
+- Su Turso, tre negozi vicini all'utente (Conad Via Ambrosini, Todis Tor Marancia, Pewex Grotta Perfetta): 113 alimenti su 127 hanno un prezzo, 541 offerte abbinate.
+- Nel browser, sul database locale (solo medie Osservaprezzi): proposta per 1 persona, budget 60 €, totale 52,26 €, salvata come lista con i pesi ("1,5 kg Pasta di semola · stima provinciale").
+- La prova ha trovato un errore di abbinamento: "Pesche Pasta Gialla" veniva letta come pasta. Ora, a parità di parole, vince l'espressione che compare prima nel nome.
+
+**Limiti noti.**
+- I prezzi delle offerte non verificate possono essere sbagliati (es. formato letto male); restano segnati come tali.
+- Le quote nutrizionali dipendono dagli alimenti con un prezzo: senza olio o legumi in offerta il modello non può proporli e lo scrive nella nota.
+- Il costo al km è fisso a 1,50 €; renderlo regolabile è un passo successivo.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

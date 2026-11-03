@@ -36,29 +36,34 @@ function parole(testo: string): string[] {
     .filter(Boolean)
 }
 
-/** Vero se le parole di `frase` compaiono di seguito tra quelle del nome. */
-function contiene(nome: string[], frase: string[]): boolean {
-  if (frase.length === 0) return false
+/** Posizione in cui le parole di `frase` compaiono di seguito tra quelle del nome, -1 se mancano. */
+function posizione(nome: string[], frase: string[]): number {
+  if (frase.length === 0) return -1
   for (let i = 0; i + frase.length <= nome.length; i++) {
-    if (frase.every((p, j) => nome[i + j] === p)) return true
+    if (frase.every((p, j) => nome[i + j] === p)) return i
   }
-  return false
+  return -1
 }
 
 /**
  * L'alimento generico del nome di un prodotto: vince l'espressione più lunga trovata
- * ("pasta integrale" batte "pasta"); a parità, il primo abbinamento dell'elenco.
+ * ("pasta integrale" batte "pasta"); a parità, quella che compare prima nel nome, perché in italiano
+ * il nome del prodotto viene per primo ("Pesche pasta gialla" sono pesche); poi l'ordine dell'elenco.
  */
 export function alimentoDaNome(nome: string, abbinamenti: Abbinamento[]): Abbinamento | null {
   const nomeParole = parole(nome)
   let migliore: Abbinamento | null = null
   let lunghezza = 0
+  let inizio = Infinity
   for (const a of abbinamenti) {
     for (const espressione of a.parole) {
       const frase = parole(espressione)
-      if (frase.length > lunghezza && contiene(nomeParole, frase)) {
+      const i = posizione(nomeParole, frase)
+      if (i === -1) continue
+      if (frase.length > lunghezza || (frase.length === lunghezza && i < inizio)) {
         migliore = a
         lunghezza = frase.length
+        inizio = i
       }
     }
   }

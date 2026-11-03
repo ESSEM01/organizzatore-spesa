@@ -110,6 +110,30 @@ const routes = {
     tokens: [[0,"api"],[0,"v1"],[0,"periodi"],[1,"id"]],
     types: placeholder as Registry['periodi.update']['types'],
   },
+  'lista_ia.proposta': {
+    methods: ["POST"],
+    pattern: '/api/v1/liste/proposta',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[0,"proposta"]],
+    types: placeholder as Registry['lista_ia.proposta']['types'],
+  },
+  'lista_ia.salva': {
+    methods: ["POST"],
+    pattern: '/api/v1/liste/da-proposta',
+    tokens: [[0,"api"],[0,"v1"],[0,"liste"],[0,"da-proposta"]],
+    types: placeholder as Registry['lista_ia.salva']['types'],
+  },
+  'lista_ia.preferenze': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/preferenze',
+    tokens: [[0,"api"],[0,"v1"],[0,"preferenze"]],
+    types: placeholder as Registry['lista_ia.preferenze']['types'],
+  },
+  'lista_ia.aggiorna_preferenze': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/preferenze',
+    tokens: [[0,"api"],[0,"v1"],[0,"preferenze"]],
+    types: placeholder as Registry['lista_ia.aggiorna_preferenze']['types'],
+  },
   'liste.store': {
     methods: ["POST"],
     pattern: '/api/v1/liste',

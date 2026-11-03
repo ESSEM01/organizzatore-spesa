@@ -21,6 +21,10 @@ export type ScannedRoutes = {
     'periodi.corrente': { paramsTuple?: []; params?: {} }
     'periodi.store': { paramsTuple?: []; params?: {} }
     'periodi.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'lista_ia.proposta': { paramsTuple?: []; params?: {} }
+    'lista_ia.salva': { paramsTuple?: []; params?: {} }
+    'lista_ia.preferenze': { paramsTuple?: []; params?: {} }
+    'lista_ia.aggiorna_preferenze': { paramsTuple?: []; params?: {} }
     'liste.store': { paramsTuple?: []; params?: {} }
     'liste.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'liste.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -36,6 +40,7 @@ export type ScannedRoutes = {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
     'periodi.corrente': { paramsTuple?: []; params?: {} }
+    'lista_ia.preferenze': { paramsTuple?: []; params?: {} }
     'liste.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   HEAD: {
@@ -44,6 +49,7 @@ export type ScannedRoutes = {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
     'periodi.corrente': { paramsTuple?: []; params?: {} }
+    'lista_ia.preferenze': { paramsTuple?: []; params?: {} }
     'liste.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   POST: {
@@ -56,6 +62,8 @@ export type ScannedRoutes = {
     'profile.email.reinvia_verifica': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.store': { paramsTuple?: []; params?: {} }
     'periodi.store': { paramsTuple?: []; params?: {} }
+    'lista_ia.proposta': { paramsTuple?: []; params?: {} }
+    'lista_ia.salva': { paramsTuple?: []; params?: {} }
     'liste.store': { paramsTuple?: []; params?: {} }
     'liste.aggiungi_voce': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'liste.aggiungi_prezzo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -68,6 +76,7 @@ export type ScannedRoutes = {
   }
   PATCH: {
     'periodi.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'lista_ia.aggiorna_preferenze': { paramsTuple?: []; params?: {} }
     'liste.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'voci.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }

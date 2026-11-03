@@ -3,6 +3,8 @@ import { formatEuro, leggiEuro } from '../../lib/format'
 import type { NegozioSalvato } from '../negozi/salvataggio'
 import type { DatiSpesa, DettaglioLista as Dettaglio, Voce } from './datiSpesa'
 
+const peso = (grammi: number) => (grammi >= 1000 ? `${(grammi / 1000).toLocaleString('it-IT')} kg` : `${grammi} g`)
+
 interface Props {
   dati: DatiSpesa
   listaId: number
@@ -226,7 +228,8 @@ function RigaVoce({
           className="size-6 shrink-0 accent-marca"
         />
         <label htmlFor={`${id}-spunta`} className={`min-w-0 flex-1 py-2 ${voce.spuntata ? 'text-testo-tenue line-through' : ''}`}>
-          <span className="tabular-nums">{voce.quantita} ×</span> {voce.prodotto.nome}
+          <span className="tabular-nums">{voce.aPeso && voce.grammi ? peso(voce.grammi) : `${voce.quantita} ×`}</span>{' '}
+          {voce.prodotto.nome}
         </label>
         <button
           type="button"
@@ -249,8 +252,9 @@ function RigaVoce({
       </div>
       {p && (
         <p className="pl-8 text-xs text-testo-tenue tabular-nums">
-          {formatEuro(p.centesimi)} cad.
+          {voce.aPeso ? `${formatEuro(p.centesimi)} per ${peso(voce.grammi ?? 0)}` : `${formatEuro(p.centesimi)} cad.`}
           {p.fonte === 'stima' ? ' · stima provinciale' : ''}
+          {p.fonte === 'offerta' ? ' · da volantino, non verificato' : ''}
           {p.altroNegozio ? ' · prezzo di un altro negozio' : ''}
           {p.vecchio ? ` · rilevato ${p.giorniEta} giorni fa` : ''}
         </p>

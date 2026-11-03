@@ -23,6 +23,14 @@ describe('alimentoDaNome', () => {
     expect(alimentoDaNome('Pollo allo spiedo', abbinamenti)?.codice).toBe(36016)
   })
 
+  it('a parità di parole vince quella che viene prima nel nome', () => {
+    const conPesche: Abbinamento[] = [...abbinamenti, { nome: 'Pesche', parole: ['pesche'], codice: 13195 }]
+
+    // Osservaprezzi: "Pesche Pasta Gialla" sono pesche, non pasta (trovato il 2026-11-03).
+    expect(alimentoDaNome('Pesche Pasta Gialla (1000 Gr)', conPesche)?.codice).toBe(13195)
+    expect(alimentoDaNome('Pasta con pesche', conPesche)?.codice).toBe(9810)
+  })
+
   it('confronta parole intere: "lattuga" non è latte', () => {
     expect(alimentoDaNome('Lattuga iceberg', abbinamenti)).toBeNull()
   })

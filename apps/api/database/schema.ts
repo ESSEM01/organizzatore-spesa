@@ -310,12 +310,14 @@ export class PeriodiBudgetSchema extends BaseModel {
 }
 
 export class PreferenzeUtenteSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'provincia', 'updatedAt', 'userId'] as const
+  static $columns = ['createdAt', 'id', 'persone', 'provincia', 'updatedAt', 'userId'] as const
   $columns = PreferenzeUtenteSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare persone: number
   @column()
   declare provincia: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
@@ -463,16 +465,24 @@ export class UserSchema extends BaseModel {
 }
 
 export class VociListaSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'listaId', 'prezzoPagatoCentesimi', 'prodottoId', 'quantita', 'spuntata', 'updatedAt'] as const
+  static $columns = ['createdAt', 'fontePrezzo', 'grammi', 'id', 'listaId', 'offertaId', 'prezzoPagatoCentesimi', 'prezzoPrevistoCentesimi', 'prodottoId', 'quantita', 'spuntata', 'updatedAt'] as const
   $columns = VociListaSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare fontePrezzo: string | null
+  @column()
+  declare grammi: number | null
   @column({ isPrimary: true })
   declare id: number
   @column()
   declare listaId: number
   @column()
+  declare offertaId: number | null
+  @column()
   declare prezzoPagatoCentesimi: number | null
+  @column()
+  declare prezzoPrevistoCentesimi: number | null
   @column()
   declare prodottoId: number
   @column()
