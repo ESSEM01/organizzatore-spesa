@@ -336,6 +336,19 @@ Controllo: GROS Sacoph, sospetto per le sole 359 offerte, riletto a blocchi ne h
 
 Piano dettagliato: `.omc/plans/lista-ia.md`.
 
+## D14 · Supermercati di Roma nel database (2026-11-03)
+
+**Richiesta dell'utente:** salvare i supermercati delle catene di cui abbiamo i volantini, per ora solo nell'area di Roma.
+
+**Come.** Comando `node ace negozi:importa`: una sola query Overpass sul **Comune di Roma** (confine amministrativo con codice ISTAT 058091), stessi tipi di negozio della ricerca nella PWA (`shop=supermarket|discount`). La catena si riconosce con `catenaDaOsm` (D10) e si tengono solo le catene con almeno un volantino letto. I negozi si salvano nella tabella `negozi` con aggiornamento per `osm_id`: rilanciare il comando aggiorna i dati senza duplicarli e non tocca i collegamenti "I miei negozi" degli utenti.
+
+**Risultato del 2026-11-03.** 775 supermercati a Roma su OpenStreetMap, 284 salvati: Conad 120, Todis 61, Elite 22, Pewex 21, Coop 21, NaturaSì 15, Il Castoro 14, Sacoph 6, MA 4. 66 non hanno l'indirizzo su OSM.
+
+**Limiti noti.**
+- I dati vengono da OpenStreetMap (© OpenStreetMap contributors, licenza ODbL): l'app deve mostrarne l'attribuzione, come già fa la mappa (D10). Possono mancare negozi o esserci negozi chiusi.
+- Il volantino Coop letto è di Coop Etruria (negozio di Roma EUR): non è detto che valga per tutti i 21 negozi Coop di Roma, che appartengono a cooperative diverse.
+- Comuni della città metropolitana fuori Roma (es. Fiumicino, Guidonia) esclusi per ora.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.
