@@ -330,7 +330,7 @@ organizzatore-spesa/
 - ogni blocco letto resta in cache su disco (`data/volantini/letture`, esclusa da git), così un errore di rete o del database non fa ripagare i blocchi già letti;
 - `--rileggi` rilegge un volantino già salvato e ne sostituisce le offerte.
 
-Da valutare: i volantini letti prima dei blocchi potrebbero essere incompleti allo stesso modo (es. GROS Sacoph, 359 offerte contro 600-700 degli altri GROS).
+Controllo: GROS Sacoph, sospetto per le sole 359 offerte, riletto a blocchi ne ha 360, quindi la prima lettura era completa (costo della prova circa $0,90, totale circa $14). Gli altri volantini letti prima dei blocchi non sono stati riletti.
 
 **Da chiarire prima della fase 3.** Per quante persone e per quanti giorni è la spesa; preferenze alimentari (dati sulla salute, D5).
 
