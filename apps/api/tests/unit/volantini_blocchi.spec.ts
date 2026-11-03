@@ -28,7 +28,8 @@ const offerta = (pagina: number): OffertaLetta => ({
 function lettoreFinto(risposte: Partial<LetturaVolantino>[] = []) {
   const pagine: number[] = []
   const leggi: LettoreVolantino = async (pdf) => {
-    const n = (await PDFDocument.load(pdf)).getPageCount()
+    const doc = await PDFDocument.load(pdf)
+    const n = doc.getPageCount()
     pagine.push(n)
     return {
       esito: 'ok',

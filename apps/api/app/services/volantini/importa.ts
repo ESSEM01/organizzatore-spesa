@@ -45,13 +45,18 @@ export async function importaVolantino(
   nomeFile: string,
   pdf: Buffer,
   leggi: LettoreVolantino,
-  { rileggi = false }: { rileggi?: boolean } = {}
+  { rileggi = false, urlFonte = null }: { rileggi?: boolean; urlFonte?: string | null } = {}
 ): Promise<EsitoImportazione> {
   const meta = metadatiDaNomeFile(nomeFile)
   const hash = createHash('sha256').update(pdf).digest('hex')
 
   const esistente = await Volantino.findBy('hashContenuto', hash)
   if (esistente?.stato === 'letto' && !rileggi) {
+    // Volantino scaricato a mano e ritrovato dal controllo settimanale: si ricorda da dove viene.
+    if (urlFonte && !esistente.urlFonte) {
+      esistente.urlFonte = urlFonte
+      await esistente.save()
+    }
     return { file: nomeFile, stato: 'gia_letto', offerte: 0, scartate: 0 }
   }
 
@@ -64,6 +69,7 @@ export async function importaVolantino(
       ambito: meta.ambito,
       regione: meta.regione,
       file: nomeFile,
+      urlFonte,
       hashContenuto: hash,
       stato: 'da_leggere',
     }))

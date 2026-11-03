@@ -30,12 +30,11 @@ export default class NegoziImporta extends BaseCommand {
     const { importaNegozi } = await import('#services/negozi/importa')
     const { default: db } = await import('@adonisjs/lucid/services/db')
 
-    const catene: string[] = (
-      await db
-        .from('catene')
-        .whereIn('id', db.from('volantini').select('catena_id').where('stato', 'letto'))
-        .select('codice')
-    ).map((c: { codice: string }) => c.codice)
+    const righe: { codice: string }[] = await db
+      .from('catene')
+      .whereIn('id', db.from('volantini').select('catena_id').where('stato', 'letto'))
+      .select('codice')
+    const catene = righe.map((c) => c.codice)
     this.logger.info(`Catene con volantino: ${catene.join(', ')}`)
 
     for (const server of SERVER_OVERPASS) {

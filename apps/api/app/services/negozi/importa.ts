@@ -28,9 +28,8 @@ export async function importaNegozi(
 ): Promise<EsitoImportazioneNegozi> {
   // L'origine serve solo al calcolo della distanza, che qui non si usa.
   const trovati = negoziDaOverpass(risposta, { lat: 0, lon: 0 })
-  const idCatene = new Map(
-    (await Catena.query().whereIn('codice', catene)).map((c) => [c.codice, c.id])
-  )
+  const righe = await Catena.query().whereIn('codice', catene)
+  const idCatene = new Map(righe.map((c) => [c.codice, c.id]))
   const daSalvare = trovati.filter((n) => n.catena !== null && idCatene.has(n.catena))
 
   const ora = DateTime.now()

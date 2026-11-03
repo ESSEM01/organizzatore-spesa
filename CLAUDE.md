@@ -87,6 +87,7 @@ Comandi dalla radice:
 - `npm test`: tutti i test.
 - `npm run dev:web` (Vite, proxy `/api` → `localhost:3333`) e `npm run dev:api`.
 - `npm run build`: dominio, poi web, poi API.
+- Da `apps/api`, con `DB_CONNECTION=libsql` per Turso: `node ace volantini:leggi [--rileggi] <pdf…>` (D13), `node ace volantini:controlla` (controllo dei volantini nuovi, D15; lo fa da solo il server con `CONTROLLO_VOLANTINI=true`), `node ace negozi:importa` (supermercati di Roma, D14). Leggere volantini costa circa $1 l'uno.
 - Dopo una modifica a `packages/domain`, ricompila (`npm run build -w @spesa/domain`) prima di usarla dall'API: l'API importa `dist/`.
 
 ## Regole di lavoro

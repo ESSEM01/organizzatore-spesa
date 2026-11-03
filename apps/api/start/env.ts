@@ -32,4 +32,7 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Claude (D4): lettura dei volantini, poi ricette e scontrini
   ANTHROPIC_API_KEY: Env.schema.secret.optional(),
+
+  // Controllo settimanale dei volantini nel server (D15): legge i nuovi con Claude, circa $1 l'uno
+  CONTROLLO_VOLANTINI: Env.schema.boolean.optional(),
 })

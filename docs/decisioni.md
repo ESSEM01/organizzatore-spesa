@@ -349,6 +349,30 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 - Il volantino Coop letto è di Coop Etruria (negozio di Roma EUR): non è detto che valga per tutti i 21 negozi Coop di Roma, che appartengono a cooperative diverse.
 - Comuni della città metropolitana fuori Roma (es. Fiumicino, Guidonia) esclusi per ora.
 
+## D15 · Controllo settimanale dei volantini (2026-11-03)
+
+**Richiesta dell'utente:** un servizio che una volta a settimana controlla se sono usciti nuovi volantini. Scelte dell'utente: quando ne trova uno nuovo **lo scarica e lo legge subito** con Claude; il controllo gira **dentro l'API**.
+
+**Come funziona.**
+- Con `CONTROLLO_VOLANTINI=true` in `apps/api/.env` il server web guarda ogni ora l'ultimo controllo registrato nella tabella `controlli_volantini`. Ne lancia uno nuovo **7 giorni dopo un controllo riuscito**, oppure un giorno dopo uno fallito o rimasto a metà (server spento). Il registro sta nel database: riavviare il server non ripete il controllo né la spesa.
+- `node ace volantini:controlla` fa lo stesso controllo subito, a mano.
+- Fonti (pagine ufficiali, D7), lette da funzioni pure in `services/volantini/fonti.ts`:
+  - **GROS** (`cedigros.com/promozioni`: MA, Pewex, Sacoph, Il Castoro) ed **Elite** (`superelite.it/promozioni`): elenco con le date, poi il link "Scarica in PDF" della pagina del volantino;
+  - **Todis** (`todis.it/volantini/lazio/`): il PDF linkato, non la versione accessibile; le date le legge il modello;
+  - **Conad**: i volantini della pagina del negozio di riferimento (Via Attilio Ambrosini, zona dell'utente, cooperativa PAC 2000A), con PDF e validità dai dati della pagina del volantino. Si saltano i cataloghi (ceste regalo, marca del distributore) e i volantini con il download disattivato.
+- Un volantino si salta se è **scaduto** o se il suo **indirizzo** risulta già letto (`volantini.url_fonte`). I volantini scaricati a mano prima di D15 si riconoscono dal contenuto (hash) al primo controllo, senza ripagarli, e da lì in poi dall'indirizzo.
+- Lettura come in D13 (blocchi di 8 pagine, cache su disco), **al massimo 15 volantini per controllo** per tenere il costo sotto controllo (circa $1 a volantino). Le offerte restano **proposte**.
+- Errori di una fonte o di un volantino si registrano in `controlli_volantini.errori` e non fermano gli altri. Una fonte che non restituisce nessun volantino è un errore: probabilmente la pagina è cambiata e il parser va aggiornato.
+- Richieste una alla volta, con User-Agent identificato e tempo massimo.
+
+**Termini d'uso (verificati il 2026-11-03).** conad.it e cedigros.com non hanno termini che regolino download o accesso automatico. Il robots.txt di Conad blocca solo `/excel-volantini.xlsx`, quello di GROS solo cartelle di sistema. GROS riserva genericamente il copyright sui contenuti. L'uso resta personale (D7); se l'app diventa pubblica va rivalutato.
+
+**Primo controllo (2026-11-03).** 13 volantini pubblicati, 9 letti, circa $8,60. Solo uno era davvero nuovo (Elite "Tutti in campo"): GROS ed Elite generano il PDF a ogni download, quindi i volantini già scaricati a mano avevano un hash diverso e sono stati riletti. Da qui in poi tutti hanno `url_fonte` e non si rileggono. Elite pubblica lo stesso volantino "Prezzi tondi" sotto due indirizzi (`prezzi-tondi-1eur-e-2eur-2` e `grandi-marche-al-costo-2`), che vengono letti entrambi. Dopo il controllo, su richiesta dell'utente, sono state cancellate le 8 copie doppie (le vecchie copie scaricate a mano e il secondo "Prezzi tondi") con le loro 3.421 offerte: restano 15 volantini e 4.660 offerte.
+
+**Esclusi dal controllo automatico.**
+- **NaturaSì**: la pagina delle offerte è un'app JavaScript e l'elenco dei volantini arriva solo dall'interfaccia interna del sito, che non si usa. Resta il caricamento a mano.
+- **Coop**: il robots.txt vieta tutto (D7). Caricamento a mano.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

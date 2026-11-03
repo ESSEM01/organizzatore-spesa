@@ -68,6 +68,33 @@ export class CondizioniUtenteSchema extends BaseModel {
   declare userId: number
 }
 
+export class ControlliVolantiniSchema extends BaseModel {
+  static $columns = ['createdAt', 'errori', 'esito', 'finitoIl', 'id', 'iniziatoIl', 'letti', 'nuovi', 'offerte', 'trovati', 'updatedAt'] as const
+  $columns = ControlliVolantiniSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare errori: string | null
+  @column()
+  declare esito: string
+  @column.dateTime()
+  declare finitoIl: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare iniziatoIl: DateTime
+  @column()
+  declare letti: number
+  @column()
+  declare nuovi: number
+  @column()
+  declare offerte: number
+  @column()
+  declare trovati: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ListeSchema extends BaseModel {
   static $columns = ['createdAt', 'dataSpesa', 'id', 'negozioId', 'nome', 'periodoBudgetId', 'stato', 'updatedAt', 'userId'] as const
   $columns = ListeSchema.$columns

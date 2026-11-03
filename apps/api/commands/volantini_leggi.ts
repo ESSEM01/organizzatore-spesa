@@ -29,24 +29,9 @@ export default class VolantiniLeggi extends BaseCommand {
       return
     }
     const { importaVolantino } = await import('#services/volantini/importa')
-    const { creaLettoreClaude } = await import('#services/volantini/lettore_claude')
-    const { conCache } = await import('#services/volantini/cache')
-    const { aBlocchi } = await import('#services/volantini/blocchi')
-    const { default: Anthropic } = await import('@anthropic-ai/sdk')
-    const { default: db } = await import('@adonisjs/lucid/services/db')
-    // A blocchi di 8 pagine; ogni blocco letto resta su disco (escluso da git), così se un blocco
-    // o il salvataggio nel database falliscono i blocchi già pagati non si ripagano.
-    const leggi = aBlocchi(
-      conCache(
-        creaLettoreClaude(new Anthropic({ apiKey: chiave })),
-        this.app.makePath('../../data/volantini/letture')
-      ),
-      8
-    )
+    const { conRiconnessione, lettoreVolantini } = await import('#services/volantini/lettore')
+    const leggi = lettoreVolantini(chiave, this.app.makePath('../../data/volantini/letture'))
     const opzioni = { rileggi: this.rileggi }
-    const connessioneCaduta = (e: unknown) =>
-      e instanceof Error &&
-      /ECONNRESET|Stream is closed|socket hang up|ETIMEDOUT|ENOTFOUND|terminated/.test(e.message)
 
     for (const percorso of this.file) {
       const nome = basename(percorso)
@@ -54,15 +39,10 @@ export default class VolantiniLeggi extends BaseCommand {
       this.logger.info(`Leggo ${nome}…`)
       try {
         const pdf = await readFile(percorso)
-        // Turso chiude le connessioni rimaste ferme durante letture lunghe: se ne apre una nuova per ogni
-        // volantino, e se cade comunque si riprova una volta (la lettura è in cache, non si ripaga).
-        await db.manager.closeAll()
-        const esito = await importaVolantino(nome, pdf, leggi, opzioni).catch(async (e) => {
-          if (!connessioneCaduta(e)) throw e
-          this.logger.warning(`${nome}: connessione al database caduta, riprovo`)
-          await db.manager.closeAll()
-          return importaVolantino(nome, pdf, leggi, opzioni)
-        })
+        const esito = await conRiconnessione(
+          () => importaVolantino(nome, pdf, leggi, opzioni),
+          (m) => this.logger.warning(`${nome}: ${m}`)
+        )
         const secondi = Math.round((Date.now() - inizio) / 1000)
         if (esito.stato === 'errore') {
           this.logger.error(`${nome}: ${esito.errore}`)
