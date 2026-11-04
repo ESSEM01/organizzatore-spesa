@@ -3,7 +3,7 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 
 /**
  * Controlla subito se sono usciti volantini nuovi, li scarica e li legge (D15).
- * È lo stesso controllo che il server fa da solo una volta a settimana con CONTROLLO_VOLANTINI=true.
+ * Lo lancia ogni lunedì GitHub Actions (.github/workflows/controllo-settimanale.yml); a mano serve per provare.
  * Uso: node ace volantini:controlla. Costo: circa $1 per volantino nuovo.
  */
 export default class VolantiniControlla extends BaseCommand {

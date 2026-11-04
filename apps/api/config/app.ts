@@ -27,6 +27,12 @@ export const http = defineConfig({
   allowMethodSpoofing: false,
 
   /**
+   * In produzione l'API sta dietro il proxy di Render (D20): l'indirizzo del telefono arriva in
+   * X-Forwarded-For e serve ai limiti per IP (D16). Ci si fida solo del primo salto, il proxy stesso.
+   */
+  trustProxy: (_indirizzo: string, distanza: number) => distanza === 0,
+
+  /**
    * Enabling async local storage will let you access HTTP context
    * from anywhere inside your application.
    */

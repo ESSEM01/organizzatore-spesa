@@ -1,0 +1,45 @@
+# Blueprint di Render (D20): un servizio web gratuito a Francoforte, dall'immagine Docker del repository.
+# I valori con `sync: false` li inserisci tu nella dashboard di Render: sono segreti o dipendono
+# dall'indirizzo che Render assegna (https://<nome>.onrender.com).
+services:
+  - type: web
+    name: organizzatore-spesa
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        sync: false
+      - key: WEB_URL
+        sync: false
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: DB_CONNECTION
+        value: libsql
+      - key: LIBSQL_URL
+        sync: false
+      - key: LIBSQL_AUTH_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LIMITE_SPESA_LLM_DOLLARI
+        value: '10'
+      - key: LIMITER_STORE
+        value: database
+      - key: MAIL_MAILER
+        value: resend
+      - key: MAIL_FROM_NAME
+        value: Organizzatore spesa
+      - key: MAIL_FROM_ADDRESS
+        value: onboarding@resend.dev
+      - key: RESEND_API_KEY
+        sync: false

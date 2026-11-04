@@ -33,9 +33,19 @@ export default class VolantiniLeggi extends BaseCommand {
     const leggi = lettoreVolantini(chiave, this.app.makePath('../../data/volantini/letture'))
     const opzioni = { rileggi: this.rileggi }
 
+    const { richiediBudgetModello, TettoSuperato } = await import('#services/costi_llm')
+
     for (const percorso of this.file) {
       const nome = basename(percorso)
       const inizio = Date.now()
+      try {
+        await richiediBudgetModello()
+      } catch (e) {
+        if (!(e instanceof TettoSuperato)) throw e
+        this.logger.error(e.message)
+        this.exitCode = 1
+        return
+      }
       this.logger.info(`Leggo ${nome}…`)
       try {
         const pdf = await readFile(percorso)

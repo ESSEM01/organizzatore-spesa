@@ -87,9 +87,10 @@ Comandi dalla radice:
 - `npm test`: tutti i test.
 - `npm run dev:web` (Vite, proxy `/api` → `localhost:3333`) e `npm run dev:api`.
 - `npm run build`: dominio, poi web, poi API.
-- Da `apps/api`, con `DB_CONNECTION=libsql` per Turso: `node ace volantini:leggi [--rileggi] <pdf…>` (D13), `node ace volantini:controlla` (controllo dei volantini nuovi, D15; lo fa da solo il server con `CONTROLLO_VOLANTINI=true`), `node ace negozi:importa` (tutti i supermercati di Roma, D14 e D17), `node ace osservaprezzi:importa` (medie mensili, D16), `node ace nutrizione:importa` (CIQUAL e alimenti italiani da `apps/api/database/data/`, D16). Leggere volantini costa circa $1 l'uno.
+- Da `apps/api`, con `DB_CONNECTION=libsql` per Turso: `node ace volantini:leggi [--rileggi] <pdf…>` (D13), `node ace volantini:controlla` (controllo settimanale di volantini, negozi e Osservaprezzi, D15; ogni lunedì lo lancia GitHub Actions, D20), `node ace negozi:importa` (tutti i supermercati di Roma, D14 e D17), `node ace osservaprezzi:importa` (medie mensili, D16), `node ace nutrizione:importa` (CIQUAL e alimenti italiani da `apps/api/database/data/`, D16). Leggere volantini costa circa $1 l'uno.
 - Lista preparata dall'IA (D18): `POST /api/v1/liste/proposta`, il modello sceglie alimenti e grammi, il dominio (`spesaIa.ts`) prezzi, budget e nutrizione, il telefono sceglie il negozio. Nei test si usa `usaPianificatore` con un pianificatore finto.
 - Account (D16): sessione in cookie `httpOnly` (guardia `web`), niente token nella PWA. Email con Resend (`RESEND_API_KEY`); senza chiave i link finiscono nel log del server.
+- Messa online (D20): un solo servizio Render (`render.yaml`, `Dockerfile`), l'API serve anche la PWA da `public/`; controllo settimanale in `.github/workflows/controllo-settimanale.yml`; tetto di spesa del modello `LIMITE_SPESA_LLM_DOLLARI` (predefinito 10 $).
 - Dopo una modifica a `packages/domain`, ricompila (`npm run build -w @spesa/domain`) prima di usarla dall'API: l'API importa `dist/`.
 
 ## Regole di lavoro

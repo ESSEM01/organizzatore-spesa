@@ -1,0 +1,50 @@
+# Controllo settimanale (D15, D20): volantini nuovi, supermercati di Roma, medie Osservaprezzi.
+# Gira su GitHub Actions e scrive su Turso, così non serve un server sempre acceso.
+# I segreti si impostano in Settings → Secrets and variables → Actions del repository.
+name: Controllo settimanale
+
+on:
+  schedule:
+    # Ogni lunedì alle 5:00 UTC (6:00 o 7:00 a Roma): i volantini nuovi escono di solito tra giovedì e lunedì.
+    - cron: '0 5 * * 1'
+  # Avvio a mano dalla scheda Actions, per provare.
+  workflow_dispatch:
+
+# Un controllo alla volta: se uno è ancora in corso, il successivo aspetta.
+concurrency:
+  group: controllo-settimanale
+  cancel-in-progress: false
+
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NODE_ENV: development
+      TZ: Europe/Rome
+      PORT: '3333'
+      HOST: localhost
+      LOG_LEVEL: info
+      APP_URL: http://localhost:3333
+      SESSION_DRIVER: cookie
+      LIMITER_STORE: memory
+      MAIL_MAILER: resend
+      MAIL_FROM_NAME: Organizzatore spesa
+      MAIL_FROM_ADDRESS: onboarding@resend.dev
+      DB_CONNECTION: libsql
+      LIMITE_SPESA_LLM_DOLLARI: '10'
+      APP_KEY: ${{ secrets.APP_KEY }}
+      LIBSQL_URL: ${{ secrets.LIBSQL_URL }}
+      LIBSQL_AUTH_TOKEN: ${{ secrets.LIBSQL_AUTH_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @spesa/domain
+      - name: Controllo dei volantini, dei negozi e di Osservaprezzi
+        working-directory: apps/api
+        run: node ace volantini:controlla

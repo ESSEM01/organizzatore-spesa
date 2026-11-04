@@ -32,9 +32,8 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Claude (D4): lettura dei volantini, poi ricette e scontrini
   ANTHROPIC_API_KEY: Env.schema.secret.optional(),
-
-  // Controllo settimanale dei volantini nel server (D15): legge i nuovi con Claude, circa $1 l'uno
-  CONTROLLO_VOLANTINI: Env.schema.boolean.optional(),
+  // Tetto mensile di spesa per il modello in dollari (piano di riordino); predefinito 10
+  LIMITE_SPESA_LLM_DOLLARI: Env.schema.number.optional(),
 
   // Tentativi di accesso limitati (D16): contatori nel database, `memory` nei test
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),

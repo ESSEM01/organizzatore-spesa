@@ -10,6 +10,7 @@ import Lista from '#models/lista'
 import PeriodoBudget from '#models/periodo_budget'
 import PreferenzeUtente from '#models/preferenze_utente'
 import RichiestaLlm from '#models/richiesta_llm'
+import { richiediBudgetModello, TettoSuperato } from '#services/costi_llm'
 import { riepilogoPeriodo } from '#services/spesa_service'
 import { opzioniSpesa, type NegozioCandidato } from '#services/spesa_ia/opzioni'
 import type { Pianificatore } from '#services/spesa_ia/pianificatore_claude'
@@ -79,6 +80,14 @@ export async function proponiLista({
   // Si pianificano i giorni che restano del periodo, oggi compreso.
   const inizio = DateTime.fromISO(oggi > dal ? oggi : dal)
   const giorni = Math.max(1, Math.round(DateTime.fromISO(al).diff(inizio, 'days').days) + 1)
+
+  // Tetto mensile di spesa del modello (piano di riordino): oltre, niente proposta.
+  try {
+    await richiediBudgetModello()
+  } catch (e) {
+    if (e instanceof TettoSuperato) throw new ErroreProposta('modello', e.message)
+    throw e
+  }
 
   const esito = await pianifica({
     budgetCentesimi: budget,

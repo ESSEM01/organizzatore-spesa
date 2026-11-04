@@ -19,3 +19,6 @@ dev-dist/
 
 # Stato di sessione di oh-my-claudecode (i piani in .omc/plans restano versionati)
 **/.omc/state/
+
+# PWA compilata copiata nell'API dal Dockerfile (D20)
+apps/api/public/

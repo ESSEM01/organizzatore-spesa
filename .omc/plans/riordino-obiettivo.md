@@ -1,6 +1,6 @@
 # Piano: riordino verso l'obiettivo dell'app
 
-**Stato:** approvato il 2026-11-04; fase 1 fatta (D19), prossima la fase 2.
+**Stato:** approvato il 2026-11-04; fase 1 fatta (D19); fase 2 preparata (D20), manca il primo deploy con gli account dell'utente.
 
 ## Obiettivo e destinatari
 L'app deve far spendere bene i soldi della spesa: **budget → negozio → cosa comprare (dieta equilibrata nel budget) → spesa in negozio → cucinare con ciò che si è comprato**, e ogni settimana farlo un po' meglio grazie ai prezzi veri. Decisione dell'utente del 2026-11-04: **uso personale e della famiglia, a Roma**. Niente scala, niente pubblico, fonti verificate per uso personale (D7, D15).
@@ -69,6 +69,8 @@ Si **tengono**: lettura dei volantini, controllo settimanale, archivio negozi, O
 - **Criteri:** `npm test` verde; nessun riferimento a `tokensGuard`, `negoziDaNominatim`, `cercaNegoziVicini` nel codice (`grep` vuoto); la ricerca a CAP 00147 dà gli stessi 29 negozi di oggi.
 
 ### Fase 2 · Messa online
+> Aggiornamento del 2026-11-04 (D20): gratis su Render (un solo servizio che serve anche la PWA, niente Caddy né DuckDNS) e controllo settimanale su GitHub Actions al posto del pianificatore nell'API.
+
 - `Dockerfile` per API (build `node ace build`) e PWA (statica servita da Caddy), `docker-compose.yml`, `Caddyfile` con HTTPS; variabili da `.env` sul server; `WEB_URL` reale.
 - Chiave Resend (la crea l'utente) e controllo settimanale attivo (`CONTROLLO_VOLANTINI=true`, `DB_CONNECTION=libsql`).
 - Tetto mensile di spesa del modello (decisione 7), con test.

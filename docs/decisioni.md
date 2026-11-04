@@ -470,6 +470,19 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 - Tolti il comando una tantum `volantini:impronte` (impronte già calcolate su tutti i volantini, D15) e la rotta `GET /` dello starter kit.
 - Abbandonati, mai costruiti: lettura del visualizzatore Penny e caricamento a mano dei volantini Coop e NaturaSì (D7). Il volantino Coop letto non vale per le Coop di Roma.
 
+## D20 · Messa online gratuita: Render e GitHub Actions (2026-11-04)
+
+**Richiesta dell'utente:** per ora soluzioni gratuite; indirizzo su un sottodominio gratuito; scelto Render tra Koyeb, Render e Oracle (verifica dei piani gratuiti del 2026-11-04: nessuno è insieme in UE, sempre acceso e senza rischi).
+
+**Come.**
+- **Un solo servizio Render**, piano free, regione Francoforte, dall'immagine `Dockerfile`: l'API AdonisJS serve anche la PWA compilata da `public/` (`@adonisjs/static`). Un solo indirizzo (`https://<nome>.onrender.com`, HTTPS di Render): il cookie di sessione resta sullo stesso sito e non servono Caddy né DuckDNS. Configurazione in `render.yaml` (Blueprint); i segreti si inseriscono nella dashboard. Le migrazioni si applicano a ogni avvio.
+- **Il servizio gratuito si addormenta** dopo 15 minuti senza uso e si risveglia in circa un minuto: il primo accesso della giornata è lento. La lista offline (fase 4 del piano) lo rende meno grave in negozio.
+- **Controllo settimanale su GitHub Actions** (`.github/workflows/controllo-settimanale.yml`, ogni lunedì alle 5:00 UTC, avviabile a mano): esegue `node ace volantini:controlla` e scrive su Turso. Sostituisce il pianificatore dentro l'API, tolto con `CONTROLLO_VOLANTINI` (non funzionerebbe con un servizio che si addormenta). Il registro resta `controlli_volantini`.
+- **Tetto mensile di spesa del modello** (`services/costi_llm.ts`, `LIMITE_SPESA_LLM_DOLLARI`, predefinito 10 $): calcolato dai token di `richieste_llm` del mese con il listino di Opus 5.5 (4 $ e 20 $ per milione di token in ingresso e in uscita). Oltre il tetto la proposta di lista risponde con un messaggio chiaro senza chiamare il modello, il controllo settimanale smette di leggere volantini e il comando `volantini:leggi` si ferma.
+- Dietro il proxy di Render ci si fida solo del primo salto per l'indirizzo del telefono (`trustProxy`), usato dai limiti per IP (D16).
+
+**Verificato in locale il 2026-11-04** (Docker non è installato sul PC): build di produzione, PWA copiata in `public/`, server in modalità produzione senza `.env`. La pagina, il manifest, il service worker, l'API e la registrazione rispondono; il cookie di sessione è `HttpOnly; Secure; SameSite=Lax`. Anche i comandi partono senza `.env`, come su GitHub Actions. Il primo deploy vero su Render resta da fare (account e segreti dell'utente).
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

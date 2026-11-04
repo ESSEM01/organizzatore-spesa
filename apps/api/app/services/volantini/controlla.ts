@@ -17,6 +17,7 @@ import {
 import { importaVolantino, type LettoreVolantino } from '#services/volantini/importa'
 import { metadatiDaNomeFile } from '#services/volantini/metadati'
 import Catena from '#models/catena'
+import { richiediBudgetModello, TettoSuperato } from '#services/costi_llm'
 
 /** Accesso alla rete, finto nei test. */
 export interface Scaricatore {
@@ -230,6 +231,12 @@ export async function controllaVolantini({
   await mkdir(cartella, { recursive: true })
   for (const c of daLeggere.slice(0, massimo)) {
     const nome = nomeFile(c)
+    // Tetto mensile di spesa del modello: i volantini rimasti si leggeranno al controllo successivo.
+    const tetto = await riprova(() => richiediBudgetModello()).catch((e: unknown) => e)
+    if (tetto instanceof TettoSuperato) {
+      esito.errori.push(tetto.message)
+      break
+    }
     try {
       const pdf = await scarica.pdf(c.pdf)
       // Stesso volantino sotto un altro indirizzo (es. Elite "Prezzi tondi"): non si ripaga.

@@ -7,20 +7,8 @@ import { importaOsservaprezzi, scaricaOsservaprezzi } from '#services/osservapre
 import { aggiornaNegoziRoma } from '#services/negozi/overpass'
 
 /**
- * Controllo settimanale dei volantini (D15): quando è dovuto, e la sua esecuzione con la rete vera.
+ * Controllo settimanale dei volantini (D15) con la rete vera: lo lancia GitHub Actions ogni lunedì (D20).
  */
-
-type Esito = 'in_corso' | 'ok' | 'errore'
-
-/** Una settimana dopo un controllo riuscito; un giorno dopo uno fallito o rimasto a metà. */
-export function controlloDovuto(
-  ultimo: { iniziatoIl: DateTime; esito: Esito | string } | null,
-  ora: DateTime
-): boolean {
-  if (!ultimo) return true
-  const attesa = ultimo.esito === 'ok' ? { days: 7 } : { days: 1 }
-  return ultimo.iniziatoIl.plus(attesa) <= ora
-}
 
 const USER_AGENT = 'organizzatore-spesa/0.1 (controllo settimanale dei volantini, uso personale)'
 
@@ -105,9 +93,4 @@ export async function eseguiControllo(
     await conRiconnessione(() => controllo.save())
     throw e
   }
-}
-
-/** L'ultimo controllo registrato, per decidere se ne serve uno nuovo. */
-export async function ultimoControllo() {
-  return conRiconnessione(() => ControlloVolantini.query().orderBy('iniziatoIl', 'desc').first())
 }
