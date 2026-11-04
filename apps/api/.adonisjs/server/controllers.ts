@@ -4,7 +4,6 @@
  */
 
 export const controllers = {
-  AccessTokens: () => import('#controllers/access_tokens_controller'),
   Email: () => import('#controllers/email_controller'),
   ListaIa: () => import('#controllers/lista_ia_controller'),
   Liste: () => import('#controllers/liste_controller'),
@@ -13,5 +12,6 @@ export const controllers = {
   NewAccount: () => import('#controllers/new_account_controller'),
   Periodi: () => import('#controllers/periodi_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  Sessione: () => import('#controllers/sessione_controller'),
   Voci: () => import('#controllers/voci_controller'),
 }

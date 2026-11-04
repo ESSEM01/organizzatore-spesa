@@ -47,7 +47,7 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/new_account_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'auth.access_tokens.store': {
+  'auth.sessione.store': {
     methods: ["POST"]
     pattern: '/api/v1/auth/login'
     types: {
@@ -55,9 +55,9 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: ExtractQuery<InferInput<(typeof import('#validators/user').loginValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
-      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'auth.email.password_dimenticata': {
@@ -112,7 +112,7 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['show']>>>
     }
   }
-  'profile.access_tokens.destroy': {
+  'profile.sessione.destroy': {
     methods: ["POST"]
     pattern: '/api/v1/account/logout'
     types: {
@@ -120,9 +120,9 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
-      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/sessione_controller').default['destroy']>>>
     }
   }
   'profile.email.reinvia_verifica': {

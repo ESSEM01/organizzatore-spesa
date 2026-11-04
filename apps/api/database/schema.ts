@@ -61,31 +61,6 @@ export class AlimentiItSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
-export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
-  $columns = AuthAccessTokenSchema.$columns
-  @column()
-  declare abilities: string
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime()
-  declare expiresAt: DateTime | null
-  @column()
-  declare hash: string
-  @column({ isPrimary: true })
-  declare id: number
-  @column.dateTime()
-  declare lastUsedAt: DateTime | null
-  @column()
-  declare name: string | null
-  @column()
-  declare tokenableId: number
-  @column()
-  declare type: string
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-}
-
 export class CateneSchema extends BaseModel {
   static $columns = ['codice', 'createdAt', 'id', 'modalitaOfferte', 'nome', 'updatedAt', 'urlVolantini'] as const
   $columns = CateneSchema.$columns

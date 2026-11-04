@@ -9,7 +9,7 @@ const tentativi = () =>
   limiter.use({ requests: 5, duration: '15 minutes', blockDuration: '15 minutes' })
 
 /** Accesso e uscita: la sessione sta in un cookie httpOnly, nessun token alla PWA (D16). */
-export default class AccessTokensController {
+export default class SessioneController {
   async store({ request, response, auth, serialize }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
     const chiave = `accesso_${email.toLowerCase()}_${request.ip()}`

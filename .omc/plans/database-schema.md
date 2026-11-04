@@ -1,3 +1,5 @@
+> **Nota del 2026-11-04:** fasi 1 e 2 realizzate; lo schema reale è nelle migrazioni di `apps/api/database/migrations/` e in `apps/api/database/schema.ts`. Aggiunte rispetto al piano: `controlli_volantini`, `volantini.impronte`, `rate_limits`, `stime_osservaprezzi` con `import_osservaprezzi`, `alimenti` e `alimenti_it`, colonne della lista IA; tolta `auth_access_tokens` (D19). Le ricette (fase 3) restano da fare.
+
 # Piano: struttura del database
 
 **Stato: fase 1 completata (2026-11-02)**, approvata dall'utente. Fasi 2–4 da fare. Deviazione dal piano: niente factory al passo 5, i test creano i dati con i modelli (dati marcati come esempio).

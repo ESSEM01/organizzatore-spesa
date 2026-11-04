@@ -1,6 +1,6 @@
 /**
  * Supermercati vicini da OpenStreetMap (docs/decisioni.md, D1, D5, D7).
- * Funzioni pure: la rete (Overpass, Nominatim) sta nell'app, qui solo calcoli e conversioni.
+ * Funzioni pure: la rete (Overpass, nel comando settimanale dell'API) sta fuori, qui solo calcoli e conversioni.
  */
 
 export interface Posizione {
@@ -88,12 +88,6 @@ export function catenaDaOsm(tag: { brand?: string; name?: string }): string | nu
   return null
 }
 
-/** `IT-RM` → `RM`. Nominatim restituisce la provincia come `ISO3166-2-lvl6`. */
-export function provinciaDaIso(codice: string | undefined): string | null {
-  const m = /^IT-([A-Z]{2})$/.exec(codice ?? '')
-  return m?.[1] ?? null
-}
-
 function indirizzo(via: string | undefined, civico: string | undefined): string | null {
   if (!via) return null
   return civico ? `${via} ${civico}` : via
@@ -128,39 +122,6 @@ export function negoziDaOverpass(risposta: { elements?: ElementoOverpass[] }, or
       catena: catenaDaOsm({ ...(tag.brand && { brand: tag.brand }), ...(tag.name && { name: tag.name }) }),
       indirizzo: indirizzo(tag['addr:street'], tag['addr:housenumber']),
       comune: tag['addr:city'] ?? null,
-      lat,
-      lon,
-      distanzaMetri: distanzaMetri(origine, { lat, lon }),
-    })
-  }
-  return ordinaPerDistanza(negozi)
-}
-
-interface RisultatoNominatim {
-  osm_type?: string
-  osm_id?: number
-  lat?: string
-  lon?: string
-  name?: string
-  extratags?: Record<string, string>
-  address?: Record<string, string>
-}
-
-/** Ripiego quando Overpass non risponde: ricerca `supermarket` di Nominatim. */
-export function negoziDaNominatim(risultati: RisultatoNominatim[], origine: Posizione): NegozioVicino[] {
-  const negozi: NegozioVicino[] = []
-  for (const r of risultati) {
-    const lat = Number(r.lat)
-    const lon = Number(r.lon)
-    if (!r.osm_type || r.osm_id === undefined || !Number.isFinite(lat) || !Number.isFinite(lon)) continue
-    const brand = r.extratags?.brand
-    const a = r.address ?? {}
-    negozi.push({
-      osmId: `${r.osm_type}/${r.osm_id}`,
-      nome: r.name || brand || NOME_PREDEFINITO,
-      catena: catenaDaOsm({ ...(brand && { brand }), ...(r.name && { name: r.name }) }),
-      indirizzo: indirizzo(a.road, a.house_number),
-      comune: a.city ?? a.town ?? a.village ?? null,
       lat,
       lon,
       distanzaMetri: distanzaMetri(origine, { lat, lon }),

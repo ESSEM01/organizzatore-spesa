@@ -76,9 +76,9 @@ Monorepo npm workspaces (D6), Node ≥ 24.
 
 | Cartella | Contenuto | Test |
 |---|---|---|
-| `packages/domain` (`@spesa/domain`) | logica pura: scelta del prezzo (`risolviPrezzo`, priorità D7), totale della lista (`totaleLista`). Importi in **centesimi interi** | Vitest |
-| `apps/web` (`@spesa/web`) | PWA React 19 + Vite 8 + Tailwind 4 + vite-plugin-pwa (`registerType: 'prompt'`). Funzioni in `src/features/`: `negozi/` cerca i supermercati vicini direttamente su OSM e li mostra su una mappa Leaflet con tile OSM, non in cache (D10); `account/` gestisce accesso e token; "I miei negozi" salvati via API (D11); `spesa/` budget del periodo e liste con prezzi (D12). Schede in `#spesa` e `#negozi`. Client API in `src/lib/api.ts` | Vitest |
-| `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, auth con access token. Database: SQLite locale (`tmp/db.sqlite3`) in sviluppo e test, Turso in produzione con `DB_CONNECTION=libsql` + `LIBSQL_URL` + `LIBSQL_AUTH_TOKEN` (D8) | Japa |
+| `packages/domain` (`@spesa/domain`) | logica pura: scelta del prezzo (`risolviPrezzo`, priorità D7), totale della lista (`totaleLista`), budget, negozi, nutrizione (`alimentoDaNome`), lista IA (`spesaIa.ts`). Importi in **centesimi interi** | Vitest |
+| `apps/web` (`@spesa/web`) | PWA React 19 + Vite 8 + Tailwind 4 + vite-plugin-pwa (`registerType: 'prompt'`). Funzioni in `src/features/`: `negozi/` cerca i supermercati di Roma nel catalogo dell'API, calcolando le distanze sul telefono, e li mostra su una mappa Leaflet (D17); `account/` accesso con sessione, verifica email, password dimenticata, cancellazione (D16); "I miei negozi" salvati via API (D11); `spesa/` budget, liste e lista preparata dall'IA (D12, D18). Schede in `#spesa`, `#negozi`, `#account`. Client API in `src/lib/api.ts` | Vitest |
+| `apps/api` (`@spesa/api`) | AdonisJS 7, starter kit API, auth con sessione in cookie (guardia `web`). Database: SQLite locale (`tmp/db.sqlite3`) in sviluppo e test, Turso in produzione con `DB_CONNECTION=libsql` + `LIBSQL_URL` + `LIBSQL_AUTH_TOKEN` (D8) | Japa |
 | `data/volantini/` | PDF dei volantini per prove e fixture, esclusi da git | – |
 
 Database: schema in `.omc/plans/database-schema.md` (D9), migrazioni in `apps/api/database/migrations/`, a fasi. Fase 1 fatta (negozi, prodotti, prezzi utente, budget per periodo, liste). Modelli in `apps/api/app/models/`: dichiarano sempre `static table` (i nomi sono italiani). I test API usano `tmp/test.sqlite3`.

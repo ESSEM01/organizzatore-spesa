@@ -459,6 +459,17 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 - Le quote nutrizionali dipendono dagli alimenti con un prezzo: senza olio o legumi in offerta il modello non può proporli e lo scrive nella nota.
 - Il costo al km è fisso a 1,50 €; renderlo regolabile è un passo successivo.
 
+## D19 · Riordino per uso familiare a Roma (2026-11-04)
+
+**Decisione dell'utente:** l'app è per sé e la famiglia, a Roma. Piano completo con le decisioni strutturali e le fasi in `.omc/plans/riordino-obiettivo.md` (approvato il 2026-11-04).
+
+**Fase 1, pulizia (fatta il 2026-11-04).**
+- Tolta la ricerca dal vivo su OpenStreetMap nella PWA (Overpass, ripiego Nominatim, unione dei risultati, comune dalla posizione): i negozi vengono solo dal catalogo di Roma (D17). Nominatim resta per trasformare città o CAP in una posizione. Fuori Roma l'app lo dice.
+- Tolte dal dominio `negoziDaNominatim` e `provinciaDaIso`, rimaste senza uso.
+- Tolta la guardia a token dello starter kit con la tabella `auth_access_tokens` (migrazione `1793705615494`): l'accesso è solo con la sessione (D16). Il controller si chiama `sessione_controller.ts`.
+- Tolti il comando una tantum `volantini:impronte` (impronte già calcolate su tutti i volantini, D15) e la rotta `GET /` dello starter kit.
+- Abbandonati, mai costruiti: lettura del visualizzatore Penny e caricamento a mano dei volantini Coop e NaturaSì (D7). Il volantino Coop letto non vale per le Coop di Roma.
+
 ## Decisioni ancora aperte
 - Fornitore del VPS (al primo deploy).
 - Catene da verificare: In's, CRAI.

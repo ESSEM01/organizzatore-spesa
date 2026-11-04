@@ -1,6 +1,6 @@
 # Piano: lista generata dall'IA (D13)
 
-**Stato:** fase A in attesa di approvazione. Requisiti e regole in `docs/decisioni.md`, D13.
+**Stato:** completato (fase A in D13/D15, fase B in D16, fase C in D18). Superato da `riordino-obiettivo.md`.
 
 ## Fase A · Offerte dai volantini (D7, D9 fase 2)
 1. Migrazioni `volantini`, `offerte` (schema in `.omc/plans/database-schema.md`, fase 2). Test dei vincoli prima.

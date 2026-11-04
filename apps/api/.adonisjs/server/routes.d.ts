@@ -7,12 +7,12 @@ export type ScannedRoutes = {
     'health': { paramsTuple?: []; params?: {} }
     'negozi': { paramsTuple?: []; params?: {} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
-    'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
+    'auth.sessione.store': { paramsTuple?: []; params?: {} }
     'auth.email.password_dimenticata': { paramsTuple?: []; params?: {} }
     'auth.verificaEmail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'auth.reimpostaPassword': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
-    'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'profile.sessione.destroy': { paramsTuple?: []; params?: {} }
     'profile.email.reinvia_verifica': { paramsTuple?: []; params?: {} }
     'profile.profile.destroy': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.index': { paramsTuple?: []; params?: {} }
@@ -54,11 +54,11 @@ export type ScannedRoutes = {
   }
   POST: {
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
-    'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
+    'auth.sessione.store': { paramsTuple?: []; params?: {} }
     'auth.email.password_dimenticata': { paramsTuple?: []; params?: {} }
     'auth.verificaEmail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'auth.reimpostaPassword': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'profile.sessione.destroy': { paramsTuple?: []; params?: {} }
     'profile.email.reinvia_verifica': { paramsTuple?: []; params?: {} }
     'mieiNegozi.miei_negozi.store': { paramsTuple?: []; params?: {} }
     'periodi.store': { paramsTuple?: []; params?: {} }

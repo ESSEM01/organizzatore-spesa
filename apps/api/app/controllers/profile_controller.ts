@@ -1,7 +1,6 @@
 import UserTransformer from '#transformers/user_transformer'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
-import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import { cancellaAccountValidator } from '#validators/user'
 
@@ -23,10 +22,7 @@ export default class ProfileController {
         errors: [{ field: 'password', message: 'La password non è corretta' }],
       })
     }
-    await db.transaction(async (trx) => {
-      await trx.from('auth_access_tokens').where('tokenable_id', utente.id).delete()
-      await User.query({ client: trx }).where('id', utente.id).delete()
-    })
+    await User.query().where('id', utente.id).delete()
     await auth.use('web').logout()
     return response.noContent()
   }

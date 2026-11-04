@@ -12,10 +12,6 @@ import { limitaEmail, limitaRegistrazione } from '#start/limiter'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
 
-router.get('/', () => {
-  return { hello: 'world' }
-})
-
 router
   .group(() => {
     router.get('health', () => ({ status: 'ok' })).as('health')
@@ -26,7 +22,7 @@ router
     router
       .group(() => {
         router.post('signup', [controllers.NewAccount, 'store']).use(limitaRegistrazione)
-        router.post('login', [controllers.AccessTokens, 'store'])
+        router.post('login', [controllers.Sessione, 'store'])
         // Password dimenticata e link firmati delle email (D16)
         router
           .post('password-dimenticata', [controllers.Email, 'passwordDimenticata'])
@@ -46,7 +42,7 @@ router
     router
       .group(() => {
         router.get('profile', [controllers.Profile, 'show'])
-        router.post('logout', [controllers.AccessTokens, 'destroy'])
+        router.post('logout', [controllers.Sessione, 'destroy'])
         router.post('verifica-email', [controllers.Email, 'reinviaVerifica']).use(limitaEmail)
         router.delete('/', [controllers.Profile, 'destroy'])
       })

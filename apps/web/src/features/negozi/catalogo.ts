@@ -37,22 +37,6 @@ export function scaricaCatalogo(api: Api = creaApi()): Promise<Catalogo> {
   return inArrivo
 }
 
-/**
- * Vero se la posizione cade nella zona dei negozi salvati (oggi il comune di Roma, D17): lì l'archivio
- * è completo e OpenStreetMap non serve. Fuori, la ricerca passa da OSM.
- */
-export function copreArea(c: Catalogo, centro: Posizione): boolean {
-  if (c.negozi.length === 0) return false
-  const lat = c.negozi.map((n) => n.lat)
-  const lon = c.negozi.map((n) => n.lon)
-  return (
-    centro.lat >= Math.min(...lat) &&
-    centro.lat <= Math.max(...lat) &&
-    centro.lon >= Math.min(...lon) &&
-    centro.lon <= Math.max(...lon)
-  )
-}
-
 export function negoziEntroRaggio(
   c: Catalogo,
   centro: Posizione,
@@ -62,13 +46,6 @@ export function negoziEntroRaggio(
     .map((n) => ({ ...n, distanzaMetri: distanzaMetri(centro, n) }))
     .filter((n) => n.distanzaMetri <= raggioMetri)
     .sort((a, b) => a.distanzaMetri - b.distanzaMetri)
-}
-
-/** Risultati dell'archivio e di OpenStreetMap insieme, una volta per negozio. */
-export function unisciRisultati(archivio: NegozioVicino[], osm: NegozioVicino[]): NegozioVicino[] {
-  const perId = new Map<string, NegozioVicino>()
-  for (const n of [...osm, ...archivio]) if (!perId.has(n.osmId)) perId.set(n.osmId, n)
-  return [...perId.values()].sort((a, b) => a.distanzaMetri - b.distanzaMetri)
 }
 
 const giornoMese = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short', timeZone: 'UTC' })

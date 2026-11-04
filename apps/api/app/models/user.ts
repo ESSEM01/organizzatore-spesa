@@ -2,7 +2,6 @@ import { UserSchema } from '#database/schema'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import { type AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { hasMany, hasOne } from '@adonisjs/lucid/orm'
 import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import CondizioneUtente from '#models/condizione_utente'
@@ -13,9 +12,6 @@ import PreferenzeUtente from '#models/preferenze_utente'
 import PrezzoUtente from '#models/prezzo_utente'
 
 export default class User extends compose(UserSchema, withAuthFinder(hash)) {
-  static accessTokens = DbAccessTokensProvider.forModel(User)
-  declare currentAccessToken?: AccessToken
-
   @hasOne(() => PreferenzeUtente)
   declare preferenze: HasOne<typeof PreferenzeUtente>
 

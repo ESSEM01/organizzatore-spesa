@@ -3,9 +3,7 @@ import {
   arrotondaPosizione,
   catenaDaOsm,
   distanzaMetri,
-  negoziDaNominatim,
   negoziDaOverpass,
-  provinciaDaIso,
 } from './negozi.js'
 
 // Coordinate e negozi di esempio, con la forma reale delle risposte OSM.
@@ -66,17 +64,6 @@ describe('catenaDaOsm', () => {
   })
 })
 
-describe('provinciaDaIso', () => {
-  it('estrae la sigla dal codice ISO 3166-2 di Nominatim', () => {
-    expect(provinciaDaIso('IT-RM')).toBe('RM')
-  })
-
-  it('restituisce null per codici non italiani o mancanti', () => {
-    expect(provinciaDaIso('FR-75')).toBeNull()
-    expect(provinciaDaIso(undefined)).toBeNull()
-  })
-})
-
 describe('negoziDaOverpass', () => {
   const risposta = {
     elements: [
@@ -134,35 +121,5 @@ describe('negoziDaOverpass', () => {
   it('accetta una risposta vuota o malformata', () => {
     expect(negoziDaOverpass({ elements: [] }, origine)).toEqual([])
     expect(negoziDaOverpass({}, origine)).toEqual([])
-  })
-})
-
-describe('negoziDaNominatim', () => {
-  it('converte i risultati di ripiego nello stesso formato', () => {
-    const negozi = negoziDaNominatim(
-      [
-        {
-          osm_type: 'way',
-          osm_id: 116587467,
-          lat: '41.8448396',
-          lon: '12.4792682',
-          name: 'Carrefour Market',
-          address: { road: 'Via Ostiense', house_number: '200', city: 'Roma' },
-        },
-      ],
-      origine,
-    )
-
-    expect(negozi).toEqual([
-      expect.objectContaining({
-        osmId: 'way/116587467',
-        nome: 'Carrefour Market',
-        catena: 'carrefour',
-        indirizzo: 'Via Ostiense 200',
-        comune: 'Roma',
-        lat: 41.8448396,
-        lon: 12.4792682,
-      }),
-    ])
   })
 })

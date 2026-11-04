@@ -8,8 +8,8 @@ export interface ApiDefinition {
     newAccount: {
       store: typeof routes['auth.new_account.store']
     }
-    accessTokens: {
-      store: typeof routes['auth.access_tokens.store']
+    sessione: {
+      store: typeof routes['auth.sessione.store']
     }
     email: {
       passwordDimenticata: typeof routes['auth.email.password_dimenticata']
@@ -22,8 +22,8 @@ export interface ApiDefinition {
       show: typeof routes['profile.profile.show']
       destroy: typeof routes['profile.profile.destroy']
     }
-    accessTokens: {
-      destroy: typeof routes['profile.access_tokens.destroy']
+    sessione: {
+      destroy: typeof routes['profile.sessione.destroy']
     }
     email: {
       reinviaVerifica: typeof routes['profile.email.reinvia_verifica']

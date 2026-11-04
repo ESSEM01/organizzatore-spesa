@@ -1,16 +1,9 @@
 import { lazy, Suspense, useId, useState, type FormEvent } from 'react'
 import type { NegozioVicino, Posizione } from '@spesa/domain'
 import { formatDistanza } from '../../lib/format'
-import {
-  copreArea,
-  descriviVolantini,
-  negoziEntroRaggio,
-  scaricaCatalogo,
-  unisciRisultati,
-  type Catalogo,
-} from './catalogo'
+import { descriviVolantini, negoziEntroRaggio, scaricaCatalogo, type Catalogo } from './catalogo'
 import { etichettaCatena } from './catene'
-import { cercaNegoziVicini, localitaDaPosizione, posizioneDaTesto, type Localita } from './osm'
+import { posizioneDaTesto, type Localita } from './osm'
 import { serveNuovaRicerca } from './vistaMappa'
 import type { OrigineRicerca } from './Mappa'
 import { chiediPosizione, ErrorePosizione } from './posizione'
@@ -25,15 +18,8 @@ type Stato =
   | { tipo: 'cerco'; messaggio: string }
   | { tipo: 'errore'; messaggio: string }
 
-/**
- * `completo`: zona coperta dall'archivio, nessuna richiesta a OSM (D17); `archivio`: negozi del database
- * in attesa di OSM; `archivio-solo`: OSM non ha risposto.
- */
-type Fonte = 'completo' | 'archivio' | 'archivio-solo' | 'overpass' | 'nominatim'
-
 interface UltimaRicerca {
   negozi: NegozioVicino[]
-  fonte: Fonte
   localita: Localita | null
   centro: Posizione
   origine: OrigineRicerca
@@ -60,51 +46,20 @@ export function NegoziVicini({ mieiOsmIds, onAggiungi }: PropsNegoziVicini) {
 
   async function cerca(posizione: Posizione, origine: OrigineRicerca) {
     setStato({ tipo: 'cerco', messaggio: 'Cerco i supermercati…' })
-    // Il centro mostrato è quello arrotondato inviato a OSM, non la posizione precisa (D5).
+    // Il centro mostrato è arrotondato a circa 100 m, non la posizione precisa (D5).
     const centro = { lat: Math.round(posizione.lat * 1000) / 1000, lon: Math.round(posizione.lon * 1000) / 1000 }
-    const catalogo = await scaricaCatalogo().catch(() => null)
-
-    // Nella zona dell'archivio (Roma) ci sono tutti i supermercati, aggiornati ogni settimana:
-    // la ricerca finisce qui, sul telefono, senza OpenStreetMap (D17).
-    if (catalogo && copreArea(catalogo, centro)) {
-      const negozi = negoziEntroRaggio(catalogo, centro, raggio)
-      const vicino = negozi[0] ?? catalogo.negozi.find((n) => n.comune)
-      const localita = vicino ? { comune: vicino.comune, provincia: vicino.provincia } : null
-      setUltimi({ negozi, fonte: 'completo', localita, centro, origine, catalogo })
-      setSelezionato(null)
-      setCentroMappa(null)
-      setStato({ tipo: 'iniziale' })
-      return
-    }
-
-    // Fuori zona: subito i negozi dell'archivio vicini, se ce ne sono, poi OpenStreetMap.
-    const localitaInArrivo = localitaDaPosizione(posizione).catch(() => null)
-    const archivio = catalogo ? negoziEntroRaggio(catalogo, centro, raggio) : []
-    if (archivio.length > 0) {
-      setUltimi({ negozi: archivio, fonte: 'archivio', localita: null, centro, origine, catalogo })
-      setSelezionato(null)
-      setCentroMappa(null)
-      setStato({ tipo: 'cerco', messaggio: 'Cerco gli altri supermercati su OpenStreetMap…' })
-    }
-
-    // Poi OpenStreetMap, più lento, completa con tutti gli altri supermercati.
     try {
-      const esito = await cercaNegoziVicini(posizione, raggio)
-      const localita = await localitaInArrivo
-      setUltimi({ negozi: unisciRisultati(archivio, esito.negozi), fonte: esito.fonte, localita, centro, origine, catalogo })
-      if (archivio.length === 0) {
-        setSelezionato(null)
-        setCentroMappa(null)
-      }
+      // Tutti i supermercati di Roma, aggiornati ogni settimana: la ricerca si fa qui, sul telefono (D17).
+      const catalogo = await scaricaCatalogo()
+      const negozi = negoziEntroRaggio(catalogo, centro, raggio)
+      const vicino = negozi[0]
+      const localita = vicino ? { comune: vicino.comune, provincia: vicino.provincia } : null
+      setUltimi({ negozi, localita, centro, origine, catalogo })
+      setSelezionato(null)
+      setCentroMappa(null)
       setStato({ tipo: 'iniziale' })
-    } catch (e) {
-      if (archivio.length > 0) {
-        const localita = await localitaInArrivo
-        setUltimi({ negozi: archivio, fonte: 'archivio-solo', localita, centro, origine, catalogo })
-        setStato({ tipo: 'iniziale' })
-      } else {
-        setStato({ tipo: 'errore', messaggio: e instanceof Error ? e.message : 'Ricerca non riuscita.' })
-      }
+    } catch {
+      setStato({ tipo: 'errore', messaggio: 'Non riesco a caricare i supermercati. Controlla la connessione.' })
     }
   }
 
@@ -248,7 +203,6 @@ export function NegoziVicini({ mieiOsmIds, onAggiungi }: PropsNegoziVicini) {
 
 function Risultati({
   negozi,
-  fonte,
   localita,
   catalogo,
   raggio,
@@ -258,7 +212,6 @@ function Risultati({
   onAggiungi,
 }: {
   negozi: NegozioVicino[]
-  fonte: Fonte
   localita: Localita | null
   catalogo: Catalogo | null
   raggio: number
@@ -286,7 +239,8 @@ function Risultati({
   if (negozi.length === 0) {
     return (
       <p className="text-sm text-testo-tenue">
-        Nessun supermercato entro {raggio / 1000} km{dove}. Prova un raggio più ampio.
+        Nessun supermercato entro {raggio / 1000} km{dove}. L’app conosce i supermercati del comune di Roma: prova un
+        raggio più ampio.
       </p>
     )
   }
@@ -296,17 +250,6 @@ function Risultati({
       <p className="text-sm text-testo-tenue">
         <span className="tabular-nums">{negozi.length}</span> supermercati entro {raggio / 1000} km{dove}
       </p>
-      {fonte === 'archivio-solo' && (
-        <p className="text-sm text-testo-tenue">
-          OpenStreetMap non risponde: vedi solo i supermercati delle catene di cui abbiamo i volantini.
-        </p>
-      )}
-      {fonte === 'nominatim' && (
-        <p className="text-sm text-testo-tenue">
-          Il servizio principale è occupato: questi risultati vengono da una ricerca di riserva e potrebbero mancare
-          alcuni negozi.
-        </p>
-      )}
       {errore && (
         <p role="alert" className="text-sm text-sforamento">
           {errore}
