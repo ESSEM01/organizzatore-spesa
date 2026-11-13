@@ -1,10 +1,10 @@
-import { createHash } from 'node:crypto'
 import app from '@adonisjs/core/services/app'
 import logger from '@adonisjs/core/services/logger'
 import { signedUrlFor } from '@adonisjs/core/services/url_builder'
 import mail from '@adonisjs/mail/services/main'
 import type User from '#models/user'
 import env from '#start/env'
+import { improntaPassword } from '#services/account/sessione'
 
 /**
  * Email dell'account (D16): verifica dell'indirizzo e reimpostazione della password.
@@ -56,14 +56,6 @@ export async function spedisciVerifica(utente: User) {
     'Tocca il link per confermare l’indirizzo email del tuo account. Vale 3 giorni.',
     linkPwa('verifica-email', percorso)
   )
-}
-
-/**
- * Impronta della password attuale: il link di reset vale solo finché la password non cambia,
- * quindi si usa una volta sola.
- */
-export function improntaPassword(utente: User) {
-  return createHash('sha256').update(utente.password).digest('hex').slice(0, 16)
 }
 
 export async function spedisciReimpostazione(utente: User) {

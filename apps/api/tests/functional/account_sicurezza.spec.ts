@@ -138,6 +138,43 @@ test.group('Account: sessione e sicurezza', (group) => {
     login.assertStatus(200)
   })
 
+  test('dopo il reset della password la vecchia sessione riceve 401', async ({
+    client,
+    assert,
+  }) => {
+    await utente()
+    // Il client dei test non conserva la sessione tra le richieste: si riusano i suoi dati,
+    // come farebbe il telefono con il cookie ricevuto al login.
+    const login = await client.post('/api/v1/auth/login').json({ email: EMAIL, password: PASSWORD })
+    const sessione = login.session()
+    assert.property(sessione, 'auth_web')
+    const prima = await client.get('/api/v1/account/profile').withSession(sessione)
+    prima.assertStatus(200)
+
+    await client.post('/api/v1/auth/password-dimenticata').json({ email: EMAIL })
+    const nuova = 'nuova-password-di-prova'
+    const reset = await client
+      .post(percorsoDalLink())
+      .json({ password: nuova, passwordConfirmation: nuova })
+    reset.assertStatus(200)
+
+    const dopo = await client.get('/api/v1/account/profile').withSession(sessione)
+    dopo.assertStatus(401)
+    // Con la nuova password si rientra.
+    const rientro = await client.post('/api/v1/auth/login').json({ email: EMAIL, password: nuova })
+    const profilo = await client.get('/api/v1/account/profile').withSession(rientro.session())
+    profilo.assertStatus(200)
+  })
+
+  test('una sessione senza l’impronta della password non vale', async ({ client }) => {
+    const u = await utente()
+
+    // Come una sessione aperta prima di questa regola: c'è l'utente, manca l'impronta.
+    const r = await client.get('/api/v1/account/profile').withSession({ auth_web: u.id })
+
+    r.assertStatus(401)
+  })
+
   test('cancellare l’account chiede la password e toglie tutti i dati personali', async ({
     client,
     assert,
