@@ -1,5 +1,11 @@
 import { defineConfig } from '@adonisjs/core/bodyparser'
 
+/**
+ * Solo JSON: la PWA non manda form né file (src/lib/api.ts) e nessuna route li legge.
+ * Form urlencoded, multipart e testo restano spenti (`types: []`): un form di un altro sito non
+ * arriva ai controller e non si accettano upload da 20 MB. Chi aggiunge le foto degli scontrini
+ * (D3) riaccende il multipart solo per quella route.
+ */
 const bodyParserConfig = defineConfig({
   /**
    * Parse request bodies for these HTTP methods.
@@ -8,19 +14,10 @@ const bodyParserConfig = defineConfig({
   allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
 
   /**
-   * Config for the "application/x-www-form-urlencoded"
-   * content-type parser.
+   * "application/x-www-form-urlencoded": spento.
    */
   form: {
-    /**
-     * Normalize empty string values to null.
-     */
-    convertEmptyStringsToNull: true,
-
-    /**
-     * Content types handled by the form parser.
-     */
-    types: ['application/x-www-form-urlencoded'],
+    types: [],
   },
 
   /**
@@ -44,34 +41,18 @@ const bodyParserConfig = defineConfig({
   },
 
   /**
-   * Config for the "multipart/form-data" content-type parser.
-   * File uploads are handled by the multipart parser.
+   * "text/*" grezzo: spento.
+   */
+  raw: {
+    types: [],
+  },
+
+  /**
+   * "multipart/form-data" (upload di file): spento.
    */
   multipart: {
-    /**
-     * Automatically process uploaded files into the system tmp directory.
-     */
-    autoProcess: true,
-
-    /**
-     * Normalize empty string values to null.
-     */
-    convertEmptyStringsToNull: true,
-
-    /**
-     * Routes where multipart processing is handled manually.
-     */
-    processManually: [],
-
-    /**
-     * Maximum accepted payload size for multipart requests.
-     */
-    limit: '20mb',
-
-    /**
-     * Content types handled by the multipart parser.
-     */
-    types: ['multipart/form-data'],
+    autoProcess: false,
+    types: [],
   },
 })
 
