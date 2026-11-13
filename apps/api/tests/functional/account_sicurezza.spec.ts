@@ -86,7 +86,8 @@ test.group('Account: sessione e sicurezza', (group) => {
     assert.notOk(r.body().data.user.emailVerificataIl)
     assert.lengthOf(posta.messages.sent(), 1)
 
-    const conferma = await client.post(percorsoDalLink())
+    // Come la PWA: senza corpo ma dichiarata JSON (con la firma in query, altrimenti 415).
+    const conferma = await client.post(percorsoDalLink()).header('Content-Type', 'application/json')
 
     conferma.assertStatus(200)
     const u = await User.findByOrFail('email', EMAIL)
@@ -107,7 +108,7 @@ test.group('Account: sessione e sicurezza', (group) => {
     await client.post('/api/v1/account/verifica-email').loginAs(u)
     const alterato = percorsoDalLink().replace(`/${u.id}?`, `/${u.id + 1}?`)
 
-    const r = await client.post(alterato)
+    const r = await client.post(alterato).header('Content-Type', 'application/json')
 
     r.assertStatus(400)
   })
@@ -138,6 +139,43 @@ test.group('Account: sessione e sicurezza', (group) => {
     login.assertStatus(200)
   })
 
+  test('dopo il reset della password la vecchia sessione riceve 401', async ({
+    client,
+    assert,
+  }) => {
+    await utente()
+    // Il client dei test non conserva la sessione tra le richieste: si riusano i suoi dati,
+    // come farebbe il telefono con il cookie ricevuto al login.
+    const login = await client.post('/api/v1/auth/login').json({ email: EMAIL, password: PASSWORD })
+    const sessione = login.session()
+    assert.property(sessione, 'auth_web')
+    const prima = await client.get('/api/v1/account/profile').withSession(sessione)
+    prima.assertStatus(200)
+
+    await client.post('/api/v1/auth/password-dimenticata').json({ email: EMAIL })
+    const nuova = 'nuova-password-di-prova'
+    const reset = await client
+      .post(percorsoDalLink())
+      .json({ password: nuova, passwordConfirmation: nuova })
+    reset.assertStatus(200)
+
+    const dopo = await client.get('/api/v1/account/profile').withSession(sessione)
+    dopo.assertStatus(401)
+    // Con la nuova password si rientra.
+    const rientro = await client.post('/api/v1/auth/login').json({ email: EMAIL, password: nuova })
+    const profilo = await client.get('/api/v1/account/profile').withSession(rientro.session())
+    profilo.assertStatus(200)
+  })
+
+  test('una sessione senza l’impronta della password non vale', async ({ client }) => {
+    const u = await utente()
+
+    // Come una sessione aperta prima di questa regola: c'è l'utente, manca l'impronta.
+    const r = await client.get('/api/v1/account/profile').withSession({ auth_web: u.id })
+
+    r.assertStatus(401)
+  })
+
   test('cancellare l’account chiede la password e toglie tutti i dati personali', async ({
     client,
     assert,
@@ -162,5 +200,114 @@ test.group('Account: sessione e sicurezza', (group) => {
     assert.isNull(await User.find(u.id))
     const [{ n }] = await db.from('periodi_budget').where('user_id', u.id).count('* as n')
     assert.equal(Number(n), 0)
+  })
+})
+
+/** Tabelle con i dati personali dell'utente e colonna che lo indica. */
+const TABELLE_UTENTE = [
+  'preferenze_utente',
+  'condizioni_utente',
+  'negozi_utente',
+  'prezzi_utente',
+  'periodi_budget',
+  'liste',
+] as const
+
+test.group('Account: cancellazione senza chiavi esterne attive', (group) => {
+  // Su Turso le chiavi esterne potrebbero essere spente: ON DELETE CASCADE non scatterebbe.
+  // Il PRAGMA va dato fuori dalla transazione, che poi lo rispetta.
+  group.each.setup(async () => {
+    await limiter.clear()
+    await db.rawQuery('PRAGMA foreign_keys = OFF')
+    const annulla = await testUtils.db().withGlobalTransaction()
+    return async () => {
+      await annulla()
+      await db.rawQuery('PRAGMA foreign_keys = ON')
+    }
+  })
+
+  test('cancellare l’account non lascia righe orfane', async ({ client, assert }) => {
+    const [{ foreign_keys: fk }] = await db.rawQuery('PRAGMA foreign_keys')
+    assert.equal(fk, 0, 'il test vale solo con le chiavi esterne spente')
+    const u = await utente()
+    const altro = await User.create({ email: 'altro@example.test', password: PASSWORD })
+    const ora = new Date()
+    const conad = await db.from('catene').where('codice', 'conad').firstOrFail()
+    const [negozioId] = await db.table('negozi').insert({
+      osm_id: 'node/1',
+      catena_id: conad.id,
+      nome: 'Negozio di esempio',
+      comune: 'Roma',
+      provincia: 'RM',
+      lat: 41.85,
+      lon: 12.49,
+      aggiornato_il: ora,
+    })
+    const [prodottoId] = await db
+      .table('prodotti')
+      .insert({ nome: 'Prodotto di esempio', creato_da_user_id: u.id, created_at: ora })
+    for (const id of [u.id, altro.id]) {
+      await db.table('preferenze_utente').insert({ user_id: id, created_at: ora })
+      await db
+        .table('condizioni_utente')
+        .insert({ user_id: id, catena_id: conad.id, condizione: 'carta-fedelta', created_at: ora })
+      await db
+        .table('negozi_utente')
+        .insert({ user_id: id, negozio_id: negozioId, created_at: ora })
+      await db.table('prezzi_utente').insert({
+        user_id: id,
+        prodotto_id: prodottoId,
+        negozio_id: negozioId,
+        centesimi: 100,
+        data: '2026-11-02',
+        fonte: 'manuale',
+        created_at: ora,
+      })
+      const [periodoId] = await db.table('periodi_budget').insert({
+        user_id: id,
+        dal: '2026-11-02',
+        al: '2026-11-08',
+        budget_centesimi: 10000,
+        created_at: ora,
+      })
+      const [listaId] = await db
+        .table('liste')
+        .insert({ user_id: id, periodo_budget_id: periodoId, nome: 'Spesa', created_at: ora })
+      await db
+        .table('voci_lista')
+        .insert({ lista_id: listaId, prodotto_id: prodottoId, quantita: 1, created_at: ora })
+      await db.table('richieste_llm').insert({
+        user_id: id,
+        scopo: 'lista',
+        modello: 'claude-opus-5-5',
+        esito: 'ok',
+        created_at: ora,
+      })
+    }
+
+    const r = await client.delete('/api/v1/account').json({ password: PASSWORD }).loginAs(u)
+
+    r.assertStatus(204)
+    assert.isNull(await User.find(u.id))
+    for (const tabella of TABELLE_UTENTE) {
+      const [{ n }] = await db.from(tabella).where('user_id', u.id).count('* as n')
+      assert.equal(Number(n), 0, `righe rimaste in ${tabella}`)
+      const [{ n: altrui }] = await db.from(tabella).where('user_id', altro.id).count('* as n')
+      assert.equal(Number(altrui), 1, `${tabella}: i dati dell'altro utente restano`)
+    }
+    const [{ n: voci }] = await db
+      .from('voci_lista')
+      .whereNotIn('lista_id', db.from('liste').select('id'))
+      .count('* as n')
+    assert.equal(Number(voci), 0, 'voci di liste cancellate')
+    const [{ n: vociAltrui }] = await db.from('voci_lista').count('* as n')
+    assert.equal(Number(vociAltrui), 1)
+    // Restano i dati comuni, senza autore: il prodotto creato e il costo della richiesta.
+    const prodotto = await db.from('prodotti').where('id', prodottoId).firstOrFail()
+    assert.isNull(prodotto.creato_da_user_id)
+    const [{ n: richieste }] = await db.from('richieste_llm').where('user_id', u.id).count('* as n')
+    assert.equal(Number(richieste), 0)
+    const [{ n: tutte }] = await db.from('richieste_llm').count('* as n')
+    assert.equal(Number(tutte), 2)
   })
 })

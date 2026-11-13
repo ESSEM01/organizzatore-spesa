@@ -34,6 +34,8 @@ server.use([
  * requests with a registered route.
  */
 router.use([
+  // Prima del body parser e della sessione: un form di un altro sito non apre sessioni.
+  () => import('#middleware/solo_json_middleware'),
   () => import('@adonisjs/core/bodyparser_middleware'),
   () => import('@adonisjs/session/session_middleware'),
   () => import('@adonisjs/shield/shield_middleware'),

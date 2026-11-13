@@ -1,12 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
-import {
-  emailAttive,
-  improntaPassword,
-  spedisciReimpostazione,
-  spedisciVerifica,
-} from '#services/account/email'
+import { emailAttive, spedisciReimpostazione, spedisciVerifica } from '#services/account/email'
+import { improntaPassword } from '#services/account/sessione'
 import { passwordDimenticataValidator, reimpostaPasswordValidator } from '#validators/user'
 
 const LINK_NON_VALIDO = 'Il link non è valido o è scaduto. Chiedine uno nuovo.'
