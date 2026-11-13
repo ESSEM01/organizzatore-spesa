@@ -130,6 +130,25 @@ test.group('I miei negozi', (group) => {
     assert.equal(dati(r).nome, 'Conad')
   })
 
+  test('troppe aggiunte in un’ora sono bloccate', async ({ client, assert }) => {
+    const u = await utente()
+    for (let i = 0; i < 30; i++) {
+      const r = await client
+        .post(URL)
+        .json({ ...indipendente, osmId: `node/${i + 1}` })
+        .loginAs(u)
+      r.assertStatus(201)
+    }
+
+    const r = await client.post(URL).json(conad).loginAs(u)
+
+    r.assertStatus(429)
+    assert.match(
+      (r.body() as unknown as { errors: { message: string }[] }).errors[0].message,
+      /Riprova tra/
+    )
+  })
+
   test('un negozio indipendente non ha catena', async ({ client, assert }) => {
     const response = await client
       .post(URL)

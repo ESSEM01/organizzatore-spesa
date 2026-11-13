@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import app from '@adonisjs/core/services/app'
 import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
+import limiter from '@adonisjs/limiter/services/main'
 import User from '#models/user'
 import { importaNutrizione } from '#services/nutrizione/importa'
 import { usaPianificatore } from '#services/spesa_ia/pianificatore'
@@ -99,6 +100,7 @@ function pianificatoreFinto() {
 
 test.group('Lista preparata dall’IA', (group) => {
   group.each.setup(async () => {
+    await limiter.clear()
     const annulla = await testUtils.db().withGlobalTransaction()
     return async () => {
       usaPianificatore(null)
@@ -195,6 +197,39 @@ test.group('Lista preparata dall’IA', (group) => {
 
     r.assertStatus(422)
     r.assertBodyContains({ errors: [{ field: 'negozi' }] })
+  })
+
+  test('oltre 10 proposte al giorno per utente la richiesta è bloccata', async ({
+    client,
+    assert,
+  }) => {
+    const { user, periodoId } = await prepara()
+    const altro = await User.create({ email: 'altro@example.test', password: 'password-di-prova' })
+    usaPianificatore(pianificatoreFinto().p)
+    for (let i = 0; i < 10; i++) {
+      const r = await client
+        .post('/api/v1/liste/proposta')
+        .json({ periodoId, oggi: OGGI })
+        .loginAs(user)
+      r.assertStatus(200)
+    }
+
+    const bloccata = await client
+      .post('/api/v1/liste/proposta')
+      .json({ periodoId, oggi: OGGI })
+      .loginAs(user)
+    // Il limite è per utente: un altro account non ne risente.
+    const altroUtente = await client
+      .post('/api/v1/liste/proposta')
+      .json({ periodoId, oggi: OGGI })
+      .loginAs(altro)
+
+    bloccata.assertStatus(429)
+    assert.match(
+      (bloccata.body() as unknown as { errors: { message: string }[] }).errors[0].message,
+      /Riprova tra \d+ or[ae]/
+    )
+    assert.notEqual(altroUtente.status(), 429)
   })
 
   test('il numero di persone si legge e si cambia', async ({ client, assert }) => {
