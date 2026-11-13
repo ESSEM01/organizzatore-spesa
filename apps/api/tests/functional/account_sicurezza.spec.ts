@@ -86,7 +86,8 @@ test.group('Account: sessione e sicurezza', (group) => {
     assert.notOk(r.body().data.user.emailVerificataIl)
     assert.lengthOf(posta.messages.sent(), 1)
 
-    const conferma = await client.post(percorsoDalLink())
+    // Come la PWA: senza corpo ma dichiarata JSON (con la firma in query, altrimenti 415).
+    const conferma = await client.post(percorsoDalLink()).header('Content-Type', 'application/json')
 
     conferma.assertStatus(200)
     const u = await User.findByOrFail('email', EMAIL)
@@ -107,7 +108,7 @@ test.group('Account: sessione e sicurezza', (group) => {
     await client.post('/api/v1/account/verifica-email').loginAs(u)
     const alterato = percorsoDalLink().replace(`/${u.id}?`, `/${u.id + 1}?`)
 
-    const r = await client.post(alterato)
+    const r = await client.post(alterato).header('Content-Type', 'application/json')
 
     r.assertStatus(400)
   })

@@ -39,6 +39,19 @@ describe('api', () => {
     expect(new Headers(f.mock.calls[0]?.[1]?.headers).get('Content-Type')).toBe('application/json')
   })
 
+  it('anche senza corpo una richiesta che cambia qualcosa si dichiara JSON (il server rifiuta il resto)', async () => {
+    const f = vi.fn<typeof fetch>(() => risposta(200, { data: null }))
+    const api = creaApi(f)
+
+    await api.richiesta('POST', '/api/v1/auth/verifica-email/3?signature=abc')
+    await api.richiesta('DELETE', '/miei-negozi/1')
+    await api.richiesta('GET', '/miei-negozi')
+
+    const tipi = f.mock.calls.map((c) => new Headers(c[1]?.headers).get('Content-Type'))
+    expect(tipi).toEqual(['application/json', 'application/json', null])
+    expect(f.mock.calls[0]?.[1]?.body).toBeUndefined()
+  })
+
   it('una risposta 204 restituisce null', async () => {
     expect(await creaApi(() => risposta(204)).richiesta('DELETE', '/miei-negozi/1')).toBeNull()
   })

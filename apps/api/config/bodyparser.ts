@@ -2,9 +2,14 @@ import { defineConfig } from '@adonisjs/core/bodyparser'
 
 /**
  * Solo JSON: la PWA non manda form né file (src/lib/api.ts) e nessuna route li legge.
- * Form urlencoded, multipart e testo restano spenti (`types: []`): un form di un altro sito non
- * arriva ai controller e non si accettano upload da 20 MB. Chi aggiunge le foto degli scontrini
- * (D3) riaccende il multipart solo per quella route.
+ * Form urlencoded, multipart e testo restano spenti (`types: []`): non si accettano upload da
+ * 20 MB e nessun corpo che non sia JSON finisce in `request.all()`.
+ *
+ * Questo da solo NON ferma un form di un altro sito: `request.validateUsing()` legge anche la
+ * query string, e un `<form action="…/auth/login?email=…&password=…">` arriverebbe lo stesso ai
+ * controller (login CSRF). Lo blocca `#middleware/solo_json_middleware`, che risponde 415 a ogni
+ * POST/PUT/PATCH/DELETE non dichiarata `application/json`. Chi aggiunge le foto degli scontrini
+ * (D3) riaccende il multipart solo per quella route e la esclude lì, con un controllo dell'Origin.
  */
 const bodyParserConfig = defineConfig({
   /**
