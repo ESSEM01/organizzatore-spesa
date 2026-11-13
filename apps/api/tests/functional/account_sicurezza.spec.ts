@@ -201,3 +201,112 @@ test.group('Account: sessione e sicurezza', (group) => {
     assert.equal(Number(n), 0)
   })
 })
+
+/** Tabelle con i dati personali dell'utente e colonna che lo indica. */
+const TABELLE_UTENTE = [
+  'preferenze_utente',
+  'condizioni_utente',
+  'negozi_utente',
+  'prezzi_utente',
+  'periodi_budget',
+  'liste',
+] as const
+
+test.group('Account: cancellazione senza chiavi esterne attive', (group) => {
+  // Su Turso le chiavi esterne potrebbero essere spente: ON DELETE CASCADE non scatterebbe.
+  // Il PRAGMA va dato fuori dalla transazione, che poi lo rispetta.
+  group.each.setup(async () => {
+    await limiter.clear()
+    await db.rawQuery('PRAGMA foreign_keys = OFF')
+    const annulla = await testUtils.db().withGlobalTransaction()
+    return async () => {
+      await annulla()
+      await db.rawQuery('PRAGMA foreign_keys = ON')
+    }
+  })
+
+  test('cancellare l’account non lascia righe orfane', async ({ client, assert }) => {
+    const [{ foreign_keys: fk }] = await db.rawQuery('PRAGMA foreign_keys')
+    assert.equal(fk, 0, 'il test vale solo con le chiavi esterne spente')
+    const u = await utente()
+    const altro = await User.create({ email: 'altro@example.test', password: PASSWORD })
+    const ora = new Date()
+    const conad = await db.from('catene').where('codice', 'conad').firstOrFail()
+    const [negozioId] = await db.table('negozi').insert({
+      osm_id: 'node/1',
+      catena_id: conad.id,
+      nome: 'Negozio di esempio',
+      comune: 'Roma',
+      provincia: 'RM',
+      lat: 41.85,
+      lon: 12.49,
+      aggiornato_il: ora,
+    })
+    const [prodottoId] = await db
+      .table('prodotti')
+      .insert({ nome: 'Prodotto di esempio', creato_da_user_id: u.id, created_at: ora })
+    for (const id of [u.id, altro.id]) {
+      await db.table('preferenze_utente').insert({ user_id: id, created_at: ora })
+      await db
+        .table('condizioni_utente')
+        .insert({ user_id: id, catena_id: conad.id, condizione: 'carta-fedelta', created_at: ora })
+      await db
+        .table('negozi_utente')
+        .insert({ user_id: id, negozio_id: negozioId, created_at: ora })
+      await db.table('prezzi_utente').insert({
+        user_id: id,
+        prodotto_id: prodottoId,
+        negozio_id: negozioId,
+        centesimi: 100,
+        data: '2026-11-02',
+        fonte: 'manuale',
+        created_at: ora,
+      })
+      const [periodoId] = await db.table('periodi_budget').insert({
+        user_id: id,
+        dal: '2026-11-02',
+        al: '2026-11-08',
+        budget_centesimi: 10000,
+        created_at: ora,
+      })
+      const [listaId] = await db
+        .table('liste')
+        .insert({ user_id: id, periodo_budget_id: periodoId, nome: 'Spesa', created_at: ora })
+      await db
+        .table('voci_lista')
+        .insert({ lista_id: listaId, prodotto_id: prodottoId, quantita: 1, created_at: ora })
+      await db.table('richieste_llm').insert({
+        user_id: id,
+        scopo: 'lista',
+        modello: 'claude-opus-5-5',
+        esito: 'ok',
+        created_at: ora,
+      })
+    }
+
+    const r = await client.delete('/api/v1/account').json({ password: PASSWORD }).loginAs(u)
+
+    r.assertStatus(204)
+    assert.isNull(await User.find(u.id))
+    for (const tabella of TABELLE_UTENTE) {
+      const [{ n }] = await db.from(tabella).where('user_id', u.id).count('* as n')
+      assert.equal(Number(n), 0, `righe rimaste in ${tabella}`)
+      const [{ n: altrui }] = await db.from(tabella).where('user_id', altro.id).count('* as n')
+      assert.equal(Number(altrui), 1, `${tabella}: i dati dell'altro utente restano`)
+    }
+    const [{ n: voci }] = await db
+      .from('voci_lista')
+      .whereNotIn('lista_id', db.from('liste').select('id'))
+      .count('* as n')
+    assert.equal(Number(voci), 0, 'voci di liste cancellate')
+    const [{ n: vociAltrui }] = await db.from('voci_lista').count('* as n')
+    assert.equal(Number(vociAltrui), 1)
+    // Restano i dati comuni, senza autore: il prodotto creato e il costo della richiesta.
+    const prodotto = await db.from('prodotti').where('id', prodottoId).firstOrFail()
+    assert.isNull(prodotto.creato_da_user_id)
+    const [{ n: richieste }] = await db.from('richieste_llm').where('user_id', u.id).count('* as n')
+    assert.equal(Number(richieste), 0)
+    const [{ n: tutte }] = await db.from('richieste_llm').count('* as n')
+    assert.equal(Number(tutte), 2)
+  })
+})
