@@ -1,6 +1,7 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
+import limiter from '@adonisjs/limiter/services/main'
 import User from '#models/user'
 
 // Negozi di esempio con la forma dei dati OSM inviati dalla PWA.
@@ -66,7 +67,10 @@ test.group('Catene precaricate (D7)', (group) => {
 })
 
 test.group('I miei negozi', (group) => {
-  group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(async () => {
+    await limiter.clear()
+    return testUtils.db().withGlobalTransaction()
+  })
 
   test('senza login la richiesta è rifiutata', async ({ client }) => {
     const response = await client.get(URL)
@@ -101,7 +105,29 @@ test.group('I miei negozi', (group) => {
     const [{ n: collegamenti }] = await db.from('negozi_utente').count('* as n')
     assert.equal(Number(negozi), 1)
     assert.equal(Number(collegamenti), 1)
-    assert.equal(dati(seconda).nome, 'Conad aggiornato')
+    assert.equal(dati(seconda).nome, 'Conad', 'il negozio comune non si modifica dal client')
+  })
+
+  test('un altro utente che aggiunge lo stesso negozio non lo può modificare', async ({
+    client,
+    assert,
+  }) => {
+    const anna = await utente('anna@example.invalid')
+    const bruno = await utente('bruno@example.invalid')
+    await client.post(URL).json(conad).loginAs(anna)
+
+    const r = await client
+      .post(URL)
+      .json({ ...conad, nome: 'Nome cambiato', catena: null, indirizzo: 'Altrove', lat: 45 })
+      .loginAs(bruno)
+
+    r.assertStatus(201)
+    const negozio = await db.from('negozi').where('osm_id', conad.osmId).firstOrFail()
+    assert.equal(negozio.nome, 'Conad')
+    assert.equal(negozio.indirizzo, 'Via Tito 13/15')
+    assert.equal(negozio.lat, conad.lat)
+    assert.isNotNull(negozio.catena_id)
+    assert.equal(dati(r).nome, 'Conad')
   })
 
   test('un negozio indipendente non ha catena', async ({ client, assert }) => {
