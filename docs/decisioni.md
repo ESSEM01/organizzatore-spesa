@@ -484,7 +484,12 @@ Piano dettagliato: `.omc/plans/lista-ia.md`.
 **Verificato in locale il 2026-11-04** (Docker non è installato sul PC): build di produzione, PWA copiata in `public/`, server in modalità produzione senza `.env`. La pagina, il manifest, il service worker, l'API e la registrazione rispondono; il cookie di sessione è `HttpOnly; Secure; SameSite=Lax`. Anche i comandi partono senza `.env`, come su GitHub Actions. Il primo deploy vero su Render resta da fare (account e segreti dell'utente).
 
 ## Decisioni ancora aperte
-- Fornitore del VPS (al primo deploy).
+Aggiornate il 2026-11-17.
 - Catene da verificare: In's, CRAI.
-- Soglia di età dei prezzi e gestione delle offerte sugli scontrini (D3).
-- Conservazione dei dati nell'API Anthropic (D5), prima della fase 2 degli scontrini.
+- Server a pagamento in UE (D6): solo se il piano gratuito di Render (D20) non basta, per esempio per l'attesa al risveglio.
+- Costo al km regolabile dall'utente (D13, rimandato in D18): oggi fisso a 1,50 €.
+
+**Chiuse.**
+- Fornitore del VPS (D6): superata da D20, Render gratuito. Il primo deploy resta da fare con gli account dell'utente.
+- Soglia di età dei prezzi (D3): applicata nel dominio, un prezzo oltre 90 giorni è segnato come vecchio (`GIORNI_PREZZO_VECCHIO`).
+- Offerte sugli scontrini (D3) e conservazione delle foto nell'API Anthropic (D5): decadute, gli scontrini non si sviluppano (D16). Ad Anthropic arrivano solo i volantini pubblici e, per la lista, budget, persone, giorni e prezzi, senza dati personali (D18).
