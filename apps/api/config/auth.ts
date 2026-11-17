@@ -1,5 +1,6 @@
 import { defineConfig } from '@adonisjs/auth'
-import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
+import { sessionUserProvider } from '@adonisjs/auth/session'
+import { guardiaSessione } from '#services/account/sessione'
 import type { InferAuthenticators, InferAuthEvents, Authenticators } from '@adonisjs/auth/types'
 
 /**
@@ -10,9 +11,8 @@ const authConfig = defineConfig({
   default: 'web',
 
   guards: {
-    web: sessionGuard({
-      useRememberMeTokens: false,
-
+    // Sessione legata all'impronta della password: un reset chiude le sessioni aperte.
+    web: guardiaSessione({
       provider: sessionUserProvider({
         model: () => import('#models/user'),
       }),

@@ -22,7 +22,9 @@ export default class MieiNegoziController {
     const { osmId, catena, ...dati } = await request.validateUsing(aggiungiNegozioValidator)
     const catenaTrovata = catena ? await Catena.findBy('codice', catena) : null
 
-    const negozio = await Negozio.updateOrCreate(
+    // Il negozio è comune a tutti: si crea se manca, ma un utente non può riscrivere quello che
+    // esiste già (nome, posizione, catena arrivano dal client e non sono affidabili).
+    const negozio = await Negozio.firstOrCreate(
       { osmId },
       {
         ...dati,

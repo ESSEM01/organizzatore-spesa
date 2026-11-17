@@ -8,7 +8,7 @@
 */
 
 import { middleware } from '#start/kernel'
-import { limitaEmail, limitaRegistrazione } from '#start/limiter'
+import { limitaEmail, limitaNegozi, limitaProposta, limitaRegistrazione } from '#start/limiter'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
 
@@ -53,7 +53,7 @@ router
     router
       .group(() => {
         router.get('/', [controllers.MieiNegozi, 'index'])
-        router.post('/', [controllers.MieiNegozi, 'store'])
+        router.post('/', [controllers.MieiNegozi, 'store']).use(limitaNegozi)
         router
           .delete('/:id', [controllers.MieiNegozi, 'destroy'])
           .where('id', router.matchers.number())
@@ -72,7 +72,7 @@ router
           .where('id', router.matchers.number())
 
         // Lista preparata dall'IA e preferenze (D18)
-        router.post('liste/proposta', [controllers.ListaIa, 'proposta'])
+        router.post('liste/proposta', [controllers.ListaIa, 'proposta']).use(limitaProposta)
         router.post('liste/da-proposta', [controllers.ListaIa, 'salva'])
         router.get('preferenze', [controllers.ListaIa, 'preferenze'])
         router.patch('preferenze', [controllers.ListaIa, 'aggiornaPreferenze'])

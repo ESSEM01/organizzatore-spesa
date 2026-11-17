@@ -40,7 +40,8 @@ export function creaApi(f: typeof fetch = (...a) => fetch(...a)) {
    */
   async function richiesta<T = unknown>(metodo: Metodo, percorso: string, corpo?: unknown): Promise<T> {
     const headers = new Headers({ Accept: 'application/json' })
-    if (corpo !== undefined) headers.set('Content-Type', 'application/json')
+    // Anche senza corpo: l'API rifiuta con 415 ciò che non si dichiara JSON (difesa dal CSRF).
+    if (metodo !== 'GET') headers.set('Content-Type', 'application/json')
 
     let r: Response
     try {

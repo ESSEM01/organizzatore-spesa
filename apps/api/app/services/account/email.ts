@@ -1,15 +1,16 @@
-import { createHash } from 'node:crypto'
 import app from '@adonisjs/core/services/app'
 import logger from '@adonisjs/core/services/logger'
 import { signedUrlFor } from '@adonisjs/core/services/url_builder'
 import mail from '@adonisjs/mail/services/main'
 import type User from '#models/user'
 import env from '#start/env'
+import { improntaPassword } from '#services/account/sessione'
 
 /**
  * Email dell'account (D16): verifica dell'indirizzo e reimpostazione della password.
  * I link portano alla PWA, che chiama l'API con il percorso firmato: la firma scade e non si altera.
- * Senza RESEND_API_KEY (sviluppo) l'email non parte e il link si scrive nel log del server.
+ * Senza RESEND_API_KEY (sviluppo) l'email non parte e il link si scrive nel log del server;
+ * in produzione mai, perché chi legge i log potrebbe usarlo.
  */
 
 const webUrl = () => env.get('WEB_URL') ?? 'http://localhost:5173'
@@ -24,13 +25,21 @@ export function emailAttive(): boolean {
 }
 
 /**
- * Spedisce l'email e dice se è partita davvero. Senza chiave, o se Resend la rifiuta, il link resta
- * nel log del server e la funzione restituisce false: l'app non deve dire "ti abbiamo spedito"
+ * Campi del log per un'email non spedita. Il link firmato vale come una password temporanea
+ * (reimposta la password o conferma l'indirizzo): in produzione non si scrive.
+ */
+export function campiLog(a: string, link: string, inProduzione = app.inProduction) {
+  return inProduzione ? { a } : { a, link }
+}
+
+/**
+ * Spedisce l'email e dice se è partita davvero. Senza chiave, o se Resend la rifiuta, la funzione
+ * restituisce false (in sviluppo il link resta nel log): l'app non deve dire "ti abbiamo spedito"
  * quando non è vero (problema segnalato dall'utente il 2026-11-03).
  */
 async function spedisci(a: string, oggetto: string, testo: string, link: string) {
   if (!emailAttive()) {
-    logger.info({ a, link }, `Email non spedita, manca RESEND_API_KEY: ${oggetto}`)
+    logger.info(campiLog(a, link), `Email non spedita, manca RESEND_API_KEY: ${oggetto}`)
     return false
   }
   try {
@@ -39,7 +48,10 @@ async function spedisci(a: string, oggetto: string, testo: string, link: string)
     })
     return true
   } catch (e) {
-    logger.error({ a, link, err: e }, `Email non spedita, errore di Resend: ${oggetto}`)
+    logger.error(
+      { ...campiLog(a, link), err: e },
+      `Email non spedita, errore di Resend: ${oggetto}`
+    )
     return false
   }
 }
@@ -56,14 +68,6 @@ export async function spedisciVerifica(utente: User) {
     'Tocca il link per confermare l’indirizzo email del tuo account. Vale 3 giorni.',
     linkPwa('verifica-email', percorso)
   )
-}
-
-/**
- * Impronta della password attuale: il link di reset vale solo finché la password non cambia,
- * quindi si usa una volta sola.
- */
-export function improntaPassword(utente: User) {
-  return createHash('sha256').update(utente.password).digest('hex').slice(0, 16)
 }
 
 export async function spedisciReimpostazione(utente: User) {

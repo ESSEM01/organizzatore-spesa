@@ -15,6 +15,10 @@ concurrency:
   group: controllo-settimanale
   cancel-in-progress: false
 
+# Il job legge solo il codice: il token di GitHub non può scrivere sul repository.
+permissions:
+  contents: read
+
 jobs:
   controllo:
     runs-on: ubuntu-latest
@@ -33,18 +37,25 @@ jobs:
       MAIL_FROM_ADDRESS: onboarding@resend.dev
       DB_CONNECTION: libsql
       LIMITE_SPESA_LLM_DOLLARI: '10'
-      APP_KEY: ${{ secrets.APP_KEY }}
-      LIBSQL_URL: ${{ secrets.LIBSQL_URL }}
-      LIBSQL_AUTH_TOKEN: ${{ secrets.LIBSQL_AUTH_TOKEN }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Azioni fissate allo SHA del commit: un tag spostato non cambia il codice eseguito.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      # Nessuno script di installazione: i binari nativi (swc, libsql) arrivano come dipendenze
+      # opzionali già nel lockfile, quindi non servono.
+      - run: npm ci --ignore-scripts
       - run: npm run build -w @spesa/domain
+      # I segreti solo qui: installazione e build non li vedono.
       - name: Controllo dei volantini, dei negozi e di Osservaprezzi
         working-directory: apps/api
+        env:
+          APP_KEY: ${{ secrets.APP_KEY }}
+          LIBSQL_URL: ${{ secrets.LIBSQL_URL }}
+          LIBSQL_AUTH_TOKEN: ${{ secrets.LIBSQL_AUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node ace volantini:controlla
