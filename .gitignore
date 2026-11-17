@@ -17,8 +17,9 @@ coverage/
 # Service worker generato da vite-plugin-pwa in sviluppo
 dev-dist/
 
-# Stato di sessione di oh-my-claudecode (i piani in .omc/plans restano versionati)
-**/.omc/state/
+# Stato locale di oh-my-claudecode (i piani in .omc/plans restano versionati)
+**/.omc/*
+!/.omc/plans/
 
 # PWA compilata copiata nell'API dal Dockerfile (D20)
 apps/api/public/
